@@ -1,378 +1,305 @@
 /**
- * Modern Arabic News/Blog JS - Production Version 2026
- * Pure Vanilla JS - No Dependencies
+ * script.js - Comprehensive Arabic Blog Logic
  */
 
-// --- Article Database ---
+// --- Comprehensive Article Database (30+ Articles) ---
 const DB = [
-    { 
-        id: 1, 
-        title: "نتائج الدوري المغربي: صراع الصدارة يشتعل", 
-        description: "شهدت الجولة الأخيرة من الدوري المغربي للمحترفين منافسات قوية، حيث تمكن الوداد والرجاء من تحقيق انتصارات هامة.", 
-        category: "رياضة", 
-        date: "04 مايو 2026",
-        image: "https://images.unsplash.com/photo-1574629810360-7efbbe195018?auto=format&fit=crop&w=800&q=80", // Soccer stadium
-        content: `
-            <p>تمكن فريق الوداد الرياضي من تعزيز صدارته للدوري المغربي بعد تغلبه على غريمه التقليدي في مباراة شهدت حضوراً جماهيرياً كبيراً وتكتيكات فنية عالية.</p>
-            <p>المنافسة هذا الموسم تبدو استثنائية مع تقارب النقاط بين المراكز الأربعة الأولى، مما يضع ضغطاً كبيراً على المدربين في الجولات القادمة.</p>
-            <h3>أهم نتائج الجولة:</h3>
-            <ul>
-                <li>الوداد 2 - 1 الرجاء</li>
-                <li>نهضة بركان 0 - 0 الجيش الملكي</li>
-            </ul>
-        `
-    },
-    { 
-        id: 2, 
-        title: "دليل الهجرة إلى كندا 2026: الفرص المتاحة", 
-        description: "تعرف على أحدث التحديثات في نظام 'الدخول السريع' والمهن الأكثر طلباً في مختلف الأقاليم الكندية هذا العام.", 
-        category: "الهجرة", 
-        date: "03 مايو 2026",
-        image: "https://images.unsplash.com/photo-1506710507565-203b9f24669b?auto=format&fit=crop&w=800&q=80", // Travel/Canada
-        content: `<p>أعلنت وزارة الهجرة الكندية عن تسهيلات جديدة للعمال المهرة في مجالات الصحة والتكنولوجيا. يتوقع أن يتم استقبال أكثر من 400 ألف مهاجر جديد خلال العام الجاري.</p>`
-    },
-    { 
-        id: 3, 
-        title: "فرص شغل في شركات تقنية كبرى بالمغرب", 
-        description: "أعلنت عدة شركات ناشئة وكبرى في القطب التكنولوجي للدار البيضاء عن رغبتها في توظيف مبرمجين ومحللي بيانات.", 
-        category: "وظائف", 
-        date: "02 مايو 2026",
-        image: "https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?auto=format&fit=crop&w=800&q=80", // Office/Working
-        content: `<p>يعرف قطاع التكنولوجيا في المغرب نمواً متسارعاً. الوظائف المطلوبة تشمل مطوري Full-Stack وخبراء الأمن السيبراني.</p>`
-    },
-    { 
-        id: 4, 
-        title: "أحدث أخبار التكنولوجيا: الذكاء الاصطناعي في 2026", 
-        description: "كيف غيرت النماذج اللغوية الكبيرة طريقة عملنا اليومية؟ تقرير شامل حول مستقبل الذكاء الاصطناعي التوليدي.", 
-        category: "تقنية", 
-        date: "01 مايو 2026",
-        image: "https://images.unsplash.com/photo-1677442136019-21780ecad995?auto=format&fit=crop&w=800&q=80" // AI/Tech
-    },
-    { 
-        id: 5, 
-        title: "دليل الحصول على رخصة السياقة بالمغرب", 
-        description: "شرح كامل للمساطر الإدارية الجديدة والأسئلة الأكثر تكراراً في الامتحان النظري لرخصة السياقة صنف B.", 
-        category: "أخبار", 
-        date: "30 أبريل 2026",
-        image: "https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?auto=format&fit=crop&w=800&q=80" // Driving/Bus
-    },
-    { 
-        id: 6, 
-        title: "مستقبل التعليم الرقمي في العالم العربي", 
-        description: "تقرير حول التحول نحو المنصات التعليمية الإلكترونية وتأثيرها على الأجيال القادمة.", 
-        category: "أخبار", 
-        date: "29 أبريل 2026", 
-        image: "https://images.unsplash.com/photo-1501504905252-473c47e087f8?auto=format&fit=crop&w=800&q=80" // News/Reading
-    },
-    { 
-        id: 7, 
-        title: "أفضل 10 تطبيقات للإنتاجية في 2026", 
-        description: "مجموعة مختارة من الأدوات التي تساعدك على تنظيم وقتك ومهامك بذكاء.", 
-        category: "تقنية", 
-        date: "28 أبريل 2026", 
-        image: "https://images.unsplash.com/photo-1512428559087-560fa5ceab42?auto=format&fit=crop&w=800&q=80" // Mobile/App
-    },
-    { 
-        id: 8, 
-        title: "كيف تبدأ مشروعك الخاص برأس مال بسيط؟", 
-        description: "خطوات عملية للشباب الراغبين في دخول عالم المقاولات الذاتية.", 
-        category: "وظائف", 
-        date: "27 أبريل 2026", 
-        image: "https://images.unsplash.com/photo-1515378791036-0648a3ef77b2?auto=format&fit=crop&w=800&q=80" // Laptop/Work
-    },
-    { 
-        id: 9, 
-        title: "أخبار الرياضة العالمية: ميركاتو الصيف يشتعل", 
-        description: "انتقالات كبرى متوقعة في الدوري الإنجليزي والإسباني.", 
-        category: "رياضة", 
-        date: "26 أبريل 2026", 
-        image: "https://images.unsplash.com/photo-1508098682722-e99c43a406b2?auto=format&fit=crop&w=800&q=80" // Stadium/Sports
-    },
-    { 
-        id: 10, 
-        title: "تطورات سوق العملات الرقمية", 
-        description: "هل لا يزال الاستثمار في البيتكوين آمناً؟ تحليل لخبراء ماليين.", 
-        category: "تقنية", 
-        date: "25 أبريل 2026", 
-        image: "https://images.unsplash.com/photo-1518546305927-5a555bb7020d?auto=format&fit=crop&w=800&q=80" // Crypto/Bitcoin
-    },
-    { 
-        id: 11, 
-        title: "دليل السفر إلى إسبانيا 2026", 
-        description: "كل ما تحتاج معرفته عن تأشيرة 'شينغن' والمتطلبات الجديدة للسياح العرب.", 
-        category: "الهجرة", 
-        date: "24 أبريل 2026", 
-        image: "https://images.unsplash.com/photo-1539037116277-4db20889f2d4?auto=format&fit=crop&w=800&q=80" // Spain/Travel
-    },
-    { 
-        id: 12, 
-        title: "نصائح لتطوير مهارات البرمجة", 
-        description: "أفضل المصادر لتعلم جافا سكريبت وبايثون من الصفر.", 
-        category: "تقنية", 
-        date: "23 أبريل 2026", 
-        image: "https://images.unsplash.com/photo-1542831371-29b0f74f9713?auto=format&fit=crop&w=800&q=80" // Code
-    },
-    
-    // --- Category: الطبخ ---
-    { 
-        id: 13, 
-        title: "أسرار تحضير الكسكس المغربي الأصيل", 
-        description: "دليل خطوة بخطوة لتحضير طبق الكسكس بسبع خضار مع أسرار 'التفويرة' المغربية التقليدية.", 
-        category: "الطبخ", 
-        date: "05 مايو 2026",
-        image: "https://images.unsplash.com/photo-1541518763669-27fef04b14ea?auto=format&fit=crop&w=800&q=80", // Couscous/Food
-        content: `<h3>طريقة التحضير التقليدية</h3><p>يعتبر الكسكس رمزاً للضيافة المغربية. السر يكمن في جودة السميد وطريقة طهيه على البخار ثلاث مرات متتالية مع إضافة السمن البلدي في المرحلة الأخيرة.</p>`
-    },
-    { 
-        id: 14, 
-        title: "حلويات العيد: طريقة عمل كعب الغزال", 
-        description: "وصفة دقيقة لتحضير أرقى الحلويات المغربية بحشوة اللوز المنسمة بماء الزهر والمسكة الحرة.", 
-        category: "الطبخ", 
-        date: "06 مايو 2026",
-        image: "https://images.unsplash.com/photo-1516685018646-527ad9501517?auto=format&fit=crop&w=800&q=80" // Sweets/Food
-    },
+    // الأخبار
+    { id: 1, category: "أخبار", title: "المغرب يطلق استراتيجية جديدة للطاقة المتجددة", date: "10 مايو 2026", description: "تهدف الاستراتيجية إلى تحقيق استقلال طاقي كامل بنسبة 52% بحلول عام 2030.", image: "https://images.unsplash.com/photo-1466611653911-95282ee3656d?w=600", content: "<p>أعلن المغرب اليوم عن خطة طموحة لتعزيز قدراته في إنتاج الطاقة الشمسية والريحية. المشروع يشمل بناء محطات جديدة في المناطق الجنوبية...</p>" },
+    { id: 2, category: "أخبار", title: "توقعات بارتفاع النمو الاقتصادي في المنطقة العربية", date: "09 مايو 2026", description: "تقارير دولية تشير إلى تحسن ملحوظ في مؤشرات الاستهلاك والاستثمار.", image: "https://images.unsplash.com/photo-1526304640581-d334cdbbf45e?w=600" },
+    { id: 3, category: "أخبار", title: "افتتاح أكبر مكتبة رقمية في الشرق الأوسط", date: "08 مايو 2026", description: "المكتبة توفر أكثر من 5 ملايين كتاب إلكتروني مجاني للباحثين والطلاب.", image: "https://images.unsplash.com/photo-1507842217343-583bb7270b66?w=600" },
 
-    // --- Category: تعليم السياقة ---
-    { 
-        id: 15, 
-        title: "دليل رخصة السياقة صنف A و B", 
-        description: "كل ما يجب معرفته عن قواعد السير الجديدة والأسئلة الأكثر تكراراً في امتحان السياقة بالمغرب لعام 2026.", 
-        category: "تعليم السياقة", 
-        date: "07 مايو 2026",
-        image: "https://images.unsplash.com/photo-1519003300449-424ad040507b?auto=format&fit=crop&w=800&q=80", // Driving/Car
-        content: `<h3>قواعد الأسبقية وعلامات المرور</h3><p>يشمل الامتحان الجديد تركيزاً أكبر على السلامة الطرقية والقيادة الاقتصادية. تأكد من مراجعة علامات المنع والإجبار بدقة.</p>`
-    },
-    { 
-        id: 16, 
-        title: "رخص السياقة المهنية C و D: الشروط والمساطر", 
-        description: "دليل المهنيين الراغبين في الحصول على رخصة سياقة الشاحنات والحافلات، مع تفاصيل الفحص الطبي الإجباري.", 
-        category: "تعليم السياقة", 
-        date: "08 مايو 2026",
-        image: "https://images.unsplash.com/photo-1601584115197-04ecc0da31d7?auto=format&fit=crop&w=800&q=80" // Truck/Driving
-    },
+    // وظائف
+    { id: 4, category: "وظائف", title: "مطلوب مهندسي برمجيات للعمل عن بعد", date: "11 مايو 2026", description: "شركة تقنية عالمية تبحث عن مطورين في تخصصات Full Stack و AI.", image: "https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=600", content: "<p>نحن نبحث عن مبرمجين شغوفين للانضمام إلى فريقنا العالمي. المميزات تشمل رواتب تنافسية وبيئة عمل مرنة...</p>" },
+    { id: 5, category: "وظائف", title: "فرص عمل في القطاع السياحي بمدينة مراكش", date: "10 مايو 2026", description: "الفنادق الكبرى تفتح باب التوظيف للموسم الصيفي في مختلف التخصصات.", image: "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?w=600" },
+    { id: 6, category: "وظائف", title: "مباراة لتوظيف 500 ملحق قضائي", date: "09 مايو 2026", description: "وزارة العدل تعلن عن تنظيم مباراة لولوج السلك القضائي لعام 2026.", image: "https://images.unsplash.com/photo-1589829545856-d10d557cf95f?w=600" },
 
-    // --- Additional News ---
-    { 
-        id: 17, 
-        title: "توقعات حالة الطقس: موجة حر مرتقبة", 
-        description: "مديرية الأرصاد الجوية تنذر بموجة حر ستشمل معظم مناطق المملكة ابتداءً من الأسبوع المقبل.", 
-        category: "أخبار", 
-        date: "09 مايو 2026",
-        image: "https://images.unsplash.com/photo-1473496169904-658ba7c44d8a?auto=format&fit=crop&w=800&q=80" // Sun/Weather
-    },
+    // الهجرة
+    { id: 7, category: "الهجرة", title: "تحديثات نظام الهجرة الكندي لعام 2026", date: "12 مايو 2026", description: "تسهيلات جديدة في معالجة طلبات الإقامة الدائمة للعمال المهرة.", image: "https://images.unsplash.com/photo-1506710507565-203b9f24669b?w=600" },
+    { id: 8, category: "الهجرة", title: "ألمانيا تفتح باب 'بطاقة الفرصة' للباحثين عن عمل", date: "11 مايو 2026", description: "كل ما تحتاج معرفته عن شروط الحصول على فيزا البحث عن عمل في ألمانيا.", image: "https://images.unsplash.com/photo-1527613426441-4da17471b66d?w=600" },
+    { id: 9, category: "الهجرة", title: "أفضل 5 دول للهجرة في 2026 للشباب العربي", date: "10 مايو 2026", description: "دراسة شاملة حول جودة الحياة وفرص العمل وسهولة الاندماج.", image: "https://images.unsplash.com/photo-1526772662000-3f88f10405ff?w=600" },
 
-    // --- New Category: الأفلام والمسلسلات ---
-    { 
-        id: 18, 
-        title: "أفضل 5 مسلسلات عربية يجب مشاهدتها", 
-        description: "قائمة مختارة لأقوى الإنتاجات الدرامية العربية التي حققت نسب مشاهدة قياسية وتصدرت 'التريند'.", 
-        category: "الأفلام والمسلسلات", 
-        date: "10 مايو 2026",
-        image: "https://images.unsplash.com/photo-1593359674291-7424fe5a7330?auto=format&fit=crop&w=800&q=80", // Cinema/TV
-        content: `<h3>الدراما العربية في أوج عطائها</h3><p>شهد هذا العام تنوعاً كبيراً في المواضيع المعالجة، من الدراما الاجتماعية إلى مسلسلات الغموض والإثارة التاريخية.</p>`
-    },
-    { 
-        id: 19, 
-        title: "مراجعة فيلم الخيال العلمي 'أمل جديد'", 
-        description: "هل يستحق الفيلم الضجة المثارة حوله؟ تحليل لأداء الممثلين والمؤثرات البصرية التي أبهرت النقاد.", 
-        category: "الأفلام والمسلسلات", 
-        date: "11 مايو 2026",
-        image: "https://images.unsplash.com/photo-1536440136628-849c177e76a1?auto=format&fit=crop&w=800&q=80" // Film/Projector
-    }
+    // رياضة
+    { id: 10, category: "رياضة", title: "نتائج قرعة دوري أبطال أفريقيا", date: "13 مايو 2026", description: "مواجهات نارية مرتقبة بين كبار الأندية العربية في دور المجموعات.", image: "https://images.unsplash.com/photo-1508098682722-e99c43a406b2?w=600" },
+    { id: 11, category: "رياضة", title: "أشرف حكيمي يقترب من العودة للدوري الإسباني", date: "12 مايو 2026", description: "تقارير صحفية تؤكد رغبة ريال مدريد في استعادة ظهيره السابق.", image: "https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=600" },
+    { id: 12, category: "رياضة", title: "المنتخب المغربي يتصدر تصنيف الفيفا عربياً", date: "11 مايو 2026", description: "أسود الأطلس يواصلون كتابة التاريخ بعد نتائجهم المبهرة الأخيرة.", image: "https://images.unsplash.com/photo-1552667466-07770ae110d0?w=600" },
+
+    // الطبخ
+    { id: 13, category: "الطبخ", title: "طريقة تحضير الطجين المغربي الأصيل", date: "14 مايو 2026", description: "أسرار النكهة المغربية التقليدية وطريقة طهي اللحم مع البرقوق.", image: "https://images.unsplash.com/photo-1541518763669-27fef04b14ea?w=600" },
+    { id: 14, category: "الطبخ", title: "5 وصفات سريعة لعشاء خفيف وصحي", date: "13 مايو 2026", description: "أطباق مبتكرة يمكن تحضيرها في أقل من 20 دقيقة وبمكونات بسيطة.", image: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=600" },
+    { id: 15, category: "الطبخ", title: "فن تحضير الحلويات الشرقية في المنزل", date: "12 مايو 2026", description: "تعلمي خطوة بخطوة كيفية صنع البقلاوة والكنافة باحترافية.", image: "https://images.unsplash.com/photo-1516685018646-527ad9501517?w=600" },
+
+    // تعليم السياقة
+    { id: 16, category: "تعليم السياقة", title: "دليل رخصة السياقة صنف B (سيارات)", date: "15 مايو 2026", description: "شرح كامل لقواعد السير وأهم الأسئلة المتكررة في الامتحان النظري.", image: "https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?w=600" },
+    { id: 17, category: "تعليم السياقة", title: "رخص السياقة المهنية C و D", date: "14 مايو 2026", description: "كل ما يجب معرفته عن سياقة الشاحنات والحافلات والمساطر الإدارية.", image: "https://images.unsplash.com/photo-1601584115197-04ecc0da31d7?w=600" },
+    { id: 18, category: "تعليم السياقة", title: "رخصة السياقة صنف A (دراجات نارية)", date: "13 مايو 2026", description: "شروط الحصول على رخصة الدراجات النارية الكبيرة والصغيرة بالمغرب.", image: "https://images.unsplash.com/photo-1558981403-c5f91cbcf523?w=600" },
+
+    // الأفلام والمسلسلات
+    { id: 19, category: "الأفلام والمسلسلات", title: "مراجعة فيلم 'أمل جديد' الدرامي", date: "16 مايو 2026", description: "لماذا تصدر هذا الفيلم شباك التذاكر في الوطن العربي هذا الأسبوع؟", image: "https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=600" },
+    { id: 20, category: "الأفلام والمسلسلات", title: "أفضل 10 مسلسلات قصيرة على نتفليكس", date: "15 مايو 2026", description: "قائمة مختارة للمشاهدة خلال عطلة نهاية الأسبوع.", image: "https://images.unsplash.com/photo-1593359674291-7424fe5a7330?w=600" },
+    { id: 21, category: "الأفلام والمسلسلات", title: "تاريخ السينما العربية: من البدايات إلى العالمية", date: "14 مايو 2026", description: "رحلة شيقة عبر الزمان لاستكشاف أهم المحطات السينمائية العربية.", image: "https://images.unsplash.com/photo-1485846234645-a62644f84728?w=600" },
+
+    // الربح من الإنترنت
+    { id: 22, category: "الربح من الإنترنت", title: "كيف تبدأ في مجال التسويق بالعمولة؟", date: "17 مايو 2026", description: "دليل شامل للمبتدئين لتحقيق أول دولار من الإنترنت عبر 'أفيلييت'.", image: "https://images.unsplash.com/photo-1518546305927-5a555bb7020d?w=600" },
+    { id: 23, category: "الربح من الإنترنت", title: "أفضل منصات العمل الحر في 2026", date: "16 مايو 2026", description: "مقارنة بين خمسات، مستقل، Upwork و Fiverr وأيها الأنسب لك.", image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=600" },
+    { id: 24, category: "الربح من الإنترنت", title: "العمل في مجال التجارة الإلكترونية 'Local DropShipping'", date: "15 مايو 2026", description: "استراتيجية الربح من بيع المنتجات المحلية والدفع عند الاستلام.", image: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=600" },
+
+    // الحرف والمشاريع
+    { id: 25, category: "الحرف والمشاريع", title: "أفكار مشاريع صغيرة ناجحة برأس مال بسيط", date: "18 مايو 2026", description: "استثمر وقتك ومهاراتك في بناء مشروع خاص من المنزل.", image: "https://images.unsplash.com/photo-1513506003901-1e6a229e2d15?w=600" },
+    { id: 26, category: "الحرف والمشاريع", title: "فن النجارة العصرية: دليلك للبدء", date: "17 مايو 2026", description: "الأدوات والتقنيات الأساسية لصناعة أثاث بسيط وجميل.", image: "https://images.unsplash.com/photo-1504148455328-c376907d081c?w=600" },
+
+    // الوثائق الإدارية
+    { id: 27, category: "الوثائق الإدارية", title: "كيفية تجديد البطاقة الوطنية للتعريف الإلكترونية", date: "19 مايو 2026", description: "المستندات المطلوبة والمساطر الجديدة لعام 2026.", image: "https://images.unsplash.com/photo-1589330694653-93c9d7d4c849?w=600" },
+    { id: 28, category: "الوثائق الإدارية", title: "دليل الحصول على جواز السفر المغربي", date: "18 مايو 2026", description: "شرح مفصل لطريقة ملء الطلب إلكترونياً وأداء الواجبات.", image: "https://images.unsplash.com/photo-1544027993-37dbfe43562a?w=600" },
+
+    // إصلاح الإلكترونيات
+    { id: 29, category: "إصلاح الإلكترونيات", title: "كيفية إصلاح شاشات الهواتف الذكية المنكسرة", date: "20 مايو 2026", description: "خطوات عملية وأدوات ضرورية للمبتدئين في مجال صيانة الهواتف.", image: "https://images.unsplash.com/photo-1581092918056-0c4c3acd3789?w=600" },
+    { id: 30, category: "إصلاح الإلكترونيات", title: "صيانة الحواسيب المحمولة: تنظيف وتسريع الجهاز", date: "19 مايو 2026", description: "طرق فعالة لتحسين أداء حاسوبك وإطالة عمر البطارية.", image: "https://images.unsplash.com/photo-1588702547919-26089e690ec9?w=600" },
+    { id: 31, category: "أخبار", title: "انطلاق مهرجان موازين الدولي 2026", date: "07 مايو 2026", description: "الرباط تستعد لاستقبال نجوم الموسيقى العالميين في النسخة الـ21.", image: "https://images.unsplash.com/photo-1459749411177-042180ceea73?w=600" },
+    { id: 32, category: "وظائف", title: "تدريبات مهنية مدفوعة الأجر في البنوك", date: "08 مايو 2026", description: "فرصة للطلبة حديثي التخرج لاكتساب خبرة ميدانية في القطاع المصرفي.", image: "https://images.unsplash.com/photo-1454165833767-027ff3d631ea?w=600" },
+    { id: 33, category: "رياضة", title: "البطلة المغربية تتوج بذهبية ألعاب القوى", date: "10 مايو 2026", description: "فخر جديد للرياضة الوطنية في المحافل الدولية.", image: "https://images.unsplash.com/photo-1461896836934-ffe607ba8211?w=600" }
 ];
 
-// ... (Categories and State unchanged)
+const Categories = [
+    "الكل", "أخبار", "وظائف", "الهجرة", "رياضة", "الطبخ", 
+    "تعليم السياقة", "الأفلام والمسلسلات", "الربح من الإنترنت", 
+    "الحرف والمشاريع", "الوثائق الإدارية", "إصلاح الإلكترونيات"
+];
 
-// ...
+// --- Application State ---
+let State = {
+    view: 'home', // 'home', 'article', 'categories', 'about'
+    category: 'الكل',
+    searchQuery: '',
+    currentPage: 1,
+    perPage: 9,
+    activeArticleId: null
+};
 
-function renderArticleList() {
+// --- DOM Selectors ---
+const El = {
+    dynamicArea: document.getElementById('dynamic-area'),
+    pagination: document.getElementById('pagination-ui'),
+    hero: document.getElementById('hero-section'),
+    quickCats: document.getElementById('quick-categories'),
+    search: document.getElementById('main-search'),
+    hamburger: document.getElementById('hamburger-btn'),
+    navMenu: document.getElementById('nav-menu'),
+    progressBar: document.getElementById('progress-bar'),
+    backToTop: document.getElementById('back-to-top')
+};
+
+// --- Core Functions ---
+
+function init() {
+    renderQuickCategories();
+    setupEventListeners();
+    router();
+}
+
+function router() {
+    closeMenu();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    
+    if (State.view === 'home') {
+        El.hero.classList.remove('hidden');
+        renderArticles();
+    } else if (State.view === 'article') {
+        El.hero.classList.add('hidden');
+        renderArticleDetail(State.activeArticleId);
+    } else if (State.view === 'categories') {
+        El.hero.classList.add('hidden');
+        renderCategoryGrid();
+    } else if (State.view === 'about') {
+        El.hero.classList.add('hidden');
+        renderAboutPage();
+    }
+    
+    updateNavActiveState();
+}
+
+// --- Rendering Functions ---
+
+function renderArticles() {
     const data = getFilteredData();
-    const start = (State.page - 1) * State.perPage;
-    const end = start + State.perPage;
-    const paginated = data.slice(start, end);
+    const start = (State.currentPage - 1) * State.perPage;
+    const paginated = data.slice(start, start + State.perPage);
 
     if (paginated.length === 0) {
         El.dynamicArea.innerHTML = `
-            <div style="text-align:center; padding: 50px;">
-                <i class="fas fa-search" style="font-size:3rem; color:#cbd5e1; margin-bottom:15px;"></i>
-                <h2>لا توجد نتائج</h2>
+            <div style="text-align:center; padding: 100px 0;">
+                <i class="fas fa-search-minus" style="font-size:4rem; color:#cbd5e1; margin-bottom:20px;"></i>
+                <h2>عذراً، لم نجد أي نتائج</h2>
                 <p>حاول البحث بكلمات أخرى أو تغيير التصنيف.</p>
+                <button class="pill" style="margin-top:20px;" onclick="resetFilter()">عرض كل المقالات</button>
             </div>
         `;
         El.pagination.innerHTML = '';
         return;
     }
 
-    const html = `
-        <div class="articles-grid">
-            ${paginated.map(item => `
-                <article class="card">
-                    <div class="card-img-wrapper">
-                        <img src="${item.image}" alt="${item.title}" class="card-img" loading="lazy">
-                        <span class="card-badge">${item.category}</span>
+    let html = `<div class="articles-grid">`;
+    paginated.forEach(item => {
+        html += `
+            <article class="card">
+                <div class="card-img-container">
+                    <img src="${item.image}" alt="${item.title}" class="card-img" loading="lazy">
+                    <span class="card-badge">${item.category}</span>
+                </div>
+                <div class="card-body">
+                    <div class="card-date"><i class="far fa-calendar-alt"></i> ${item.date}</div>
+                    <h3>${item.title}</h3>
+                    <p>${item.description}</p>
+                    <div class="btn-read" onclick="openArticle(${item.id})">
+                        اقرأ المزيد <i class="fas fa-arrow-left"></i>
                     </div>
-                    <div class="card-body">
-                        <h3>${item.title}</h3>
-                        <div class="card-date"><i class="far fa-calendar-alt"></i> ${item.date}</div>
-                        <p>${item.description}</p>
-                        <div class="btn-link" style="cursor:pointer" onclick="viewArticle(${item.id})">
-                            اقرأ المزيد <i class="fas fa-arrow-left"></i>
-                        </div>
-                    </div>
-                </article>
-            `).join('')}
-        </div>
-    `;
+                </div>
+            </article>
+        `;
+    });
+    html += `</div>`;
     
     El.dynamicArea.innerHTML = html;
     renderPagination(data.length);
 }
 
-// ...
+function renderPagination(total) {
+    const pages = Math.ceil(total / State.perPage);
+    if (pages <= 1) {
+        El.pagination.innerHTML = '';
+        return;
+    }
 
-function viewArticle(id) {
-    const item = DB.find(a => a.id === id);
-    if (!item) return;
+    let html = `
+        <button class="page-btn nav-btn ${State.currentPage === 1 ? 'disabled' : ''}" onclick="prevPage()">السابق</button>
+    `;
 
-    State.view = 'article';
-    El.hero.classList.add('hidden');
-    El.pagination.innerHTML = '';
+    for (let i = 1; i <= pages; i++) {
+        if (i === 1 || i === pages || (i >= State.currentPage - 1 && i <= State.currentPage + 1)) {
+            html += `<button class="page-btn ${State.currentPage === i ? 'active' : ''}" onclick="setPage(${i})">${i}</button>`;
+        } else if (i === State.currentPage - 2 || i === State.currentPage + 2) {
+            html += `<span style="padding: 10px;">...</span>`;
+        }
+    }
+
+    html += `
+        <button class="page-btn nav-btn ${State.currentPage === pages ? 'disabled' : ''}" onclick="nextPage()">التالي</button>
+    `;
     
+    El.pagination.innerHTML = html;
+}
+
+function renderQuickCategories() {
+    El.quickCats.innerHTML = Categories.map(cat => `
+        <div class="pill ${State.category === cat ? 'active' : ''}" onclick="filterByCategory('${cat}')">${cat}</div>
+    `).join('');
+}
+
+function renderArticleDetail(id) {
+    const item = DB.find(a => a.id === id);
+    if (!item) return navigate('home');
+
+    El.pagination.innerHTML = '';
     El.dynamicArea.innerHTML = `
         <div class="detail-view">
-            <img src="${item.image}" alt="${item.title}" class="detail-header-img">
-            <div class="detail-body">
-                <div class="back-link" onclick="navigate('home')">
+            <img src="${item.image}" alt="${item.title}" class="detail-img">
+            <div class="detail-content">
+                <div class="back-btn" onclick="navigate('home')">
                     <i class="fas fa-arrow-right"></i> العودة للرئيسية
                 </div>
-                <h2>${item.title}</h2>
-                <div class="article-meta">
-                    <span><i class="far fa-folder"></i> ${item.category}</span>
-                    <span><i class="far fa-calendar-alt"></i> ${item.date}</span>
+                <div class="detail-header">
+                    <h2>${item.title}</h2>
+                    <div class="detail-meta">
+                        <span><i class="far fa-folder"></i> ${item.category}</span>
+                        <span><i class="far fa-calendar-alt"></i> ${item.date}</span>
+                    </div>
                 </div>
-                <div class="article-text">
-                    ${item.content || \`<p>\${item.description}</p><p>المحتوى الكامل لهذا المقال سيتم توفيره قريباً. شكراً لمتابعتكم مدونة المعرفة.</p>\`}
+                <div class="article-body">
+                    ${item.content || `
+                        <p>${item.description}</p>
+                        <p>يعتبر هذا الموضوع من أهم القضايا التي تهم المتابع العربي في الوقت الراهن. نحن في مدونة المعرفة نحرص على تقديم أدق التفاصيل والمعلومات الموثوقة لمتابعينا الكرام.</p>
+                        <p>سوف يتم تحديث هذا المقال بمزيد من التفاصيل والبيانات الحصرية قريباً. شكراً لمتابعتكم لنا.</p>
+                    `}
                 </div>
             </div>
         </div>
     `;
-    window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 function renderCategoryGrid() {
-    const icons = { 
-        'أخبار': 'fa-newspaper', 
-        'الهجرة': 'fa-globe-africa', 
-        'وظائف': 'fa-briefcase', 
-        'رياضة': 'fa-futbol', 
-        'تقنية': 'fa-laptop-code',
-        'الطبخ': 'fa-utensils',
-        'تعليم السياقة': 'fa-car',
-        'الأفلام والمسلسلات': 'fa-film'
+    const icons = {
+        "أخبار": "fa-newspaper", "وظائف": "fa-briefcase", "الهجرة": "fa-globe-africa",
+        "رياضة": "fa-futbol", "الطبخ": "fa-utensils", "تعليم السياقة": "fa-car",
+        "الأفلام والمسلسلات": "fa-film", "الربح من الإنترنت": "fa-laptop-code",
+        "الحرف والمشاريع": "fa-hammer", "الوثائق الإدارية": "fa-file-signature",
+        "إصلاح الإلكترونيات": "fa-tools"
     };
-    
-    El.dynamicArea.innerHTML = `
-        <div style="text-align:center; margin-bottom:40px;">
-            <h2>تصفح حسب التصنيفات</h2>
-            <p>اختر المجال الذي يهمك لاستكشاف أحدث المقالات</p>
+
+    let html = `
+        <div style="text-align:center; margin-bottom: 50px;">
+            <h2>تصفح حسب المجالات</h2>
+            <p>اختر التصنيف الذي يهمك للوصول إلى كافة المقالات المتعلقة به</p>
         </div>
-        <div class="cat-grid">
-            ${Categories.filter(c => c !== 'الكل').map(cat => `
-                <div class="cat-card" onclick="filterByCategory('${cat}')">
-                    <i class="fas ${icons[cat] || 'fa-folder'}"></i>
-                    <h3>${cat}</h3>
-                    <p>${DB.filter(a => a.category === cat).length} مقال</p>
-                </div>
-            `).join('')}
+        <div class="articles-grid">
+    `;
+
+    Categories.filter(c => c !== 'الكل').forEach(cat => {
+        html += `
+            <div class="card" style="text-align:center; padding: 40px 20px; cursor:pointer;" onclick="filterByCategory('${cat}')">
+                <i class="fas ${icons[cat] || 'fa-folder'}" style="font-size:3rem; color:var(--primary); margin-bottom:20px;"></i>
+                <h3 style="margin-bottom:10px;">${cat}</h3>
+                <p>${DB.filter(a => a.category === cat).length} مقال</p>
+            </div>
+        `;
+    });
+
+    html += `</div>`;
+    El.dynamicArea.innerHTML = html;
+    El.pagination.innerHTML = '';
+}
+
+function renderAboutPage() {
+    El.pagination.innerHTML = '';
+    El.dynamicArea.innerHTML = `
+        <div class="detail-view" style="padding: 60px;">
+            <h2 style="text-align:center; margin-bottom:30px;">عن مدونة المعرفة</h2>
+            <div class="article-body">
+                <p><strong>مدونة المعرفة</strong> هي منصة رقمية عربية تأسست عام 2026 لتكون المرجع الأول للمواطن العربي في البحث عن المعلومة الدقيقة والموثوقة.</p>
+                <p>نحن نؤمن بأن المحتوى العربي الرقمي يحتاج إلى المزيد من الجودة والعمق، ولذلك يعمل فريقنا المتخصص على تغطية مجالات متنوعة تشمل سوق الشغل، الهجرة، التكنولوجيا، والمهارات الحياتية.</p>
+                <h3>رؤيتنا:</h3>
+                <p>أن نصبح الوجهة الرقمية الأكثر تأثيراً في إثراء الفكر العربي وتمكين الشباب بالأدوات والمعلومات اللازمة للنجاح.</p>
+            </div>
         </div>
     `;
-    El.pagination.innerHTML = '';
 }
 
-function renderStaticPage(type) {
-    let content = '';
-    if (type === 'about') {
-        content = `
-            <div class="detail-view" style="padding: 40px;">
-                <h2 style="text-align:center; margin-bottom:30px;">من نحن</h2>
-                <div class="article-text">
-                    <p><strong>مدونة المعرفة</strong> هي وجهتكم الأولى للحصول على معلومات دقيقة وموثوقة حول أهم المواضيع التي تهم المواطن العربي.</p>
-                    <p>نحن فريق من المحررين المتخصصين نسعى لتبسيط المعلومة وتقديمها بأسلوب عصري يواكب التطور التكنولوجي.</p>
-                    <h3>أهدافنا:</h3>
-                    <ul>
-                        <li>توفير قاعدة بيانات شاملة لفرص الشغل.</li>
-                        <li>شرح مساطر الهجرة والوثائق الإدارية.</li>
-                        <li>تقديم تحليلات تقنية ورياضية موضوعية.</li>
-                    </ul>
-                </div>
-            </div>
-        `;
-    } else if (type === 'contact') {
-        content = `
-            <div class="detail-view" style="padding: 40px;">
-                <h2 style="text-align:center; margin-bottom:30px;">اتصل بنا</h2>
-                <form id="contact-form" onsubmit="handleContact(event)" style="display:flex; flex-direction:column; gap:20px;">
-                    <div style="display:flex; flex-direction:column; gap:8px;">
-                        <label>الاسم الكامل</label>
-                        <input type="text" required style="padding:12px; border:1px solid #ddd; border-radius:8px;">
-                    </div>
-                    <div style="display:flex; flex-direction:column; gap:8px;">
-                        <label>البريد الإلكتروني</label>
-                        <input type="email" required style="padding:12px; border:1px solid #ddd; border-radius:8px;">
-                    </div>
-                    <div style="display:flex; flex-direction:column; gap:8px;">
-                        <label>الرسالة</label>
-                        <textarea rows="5" required style="padding:12px; border:1px solid #ddd; border-radius:8px;"></textarea>
-                    </div>
-                    <button type="submit" style="padding:15px; background:#2563eb; color:white; border:none; border-radius:8px; font-weight:700; cursor:pointer;">إرسال الرسالة</button>
-                </form>
-            </div>
-        `;
-    }
-    El.dynamicArea.innerHTML = content;
-    El.pagination.innerHTML = '';
-}
+// --- Event Handlers & Helpers ---
 
-// --- Event Handlers ---
-
-function setupGlobalListeners() {
-    // Search
-    El.search.addEventListener('input', debounce((e) => {
-        State.search = e.target.value.trim();
-        State.page = 1;
-        State.view = 'home';
-        router();
-    }, 300));
-
-    // Hamburger Menu
-    El.hamburger.addEventListener('click', toggleMenu);
-
-    // Nav Links
-    document.querySelectorAll('[data-page]').forEach(link => {
-        link.addEventListener('click', (e) => {
-            e.preventDefault();
-            const page = e.target.closest('[data-page]').dataset.page;
-            navigate(page);
-        });
+function setupEventListeners() {
+    // Search with Debounce
+    let searchTimeout;
+    El.search.addEventListener('input', (e) => {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => {
+            State.searchQuery = e.target.value.trim().toLowerCase();
+            State.currentPage = 1;
+            State.view = 'home';
+            router();
+        }, 300);
     });
 
-    // Home Logo
-    document.getElementById('home-logo').addEventListener('click', (e) => {
-        e.preventDefault();
-        State.category = 'الكل';
-        State.search = '';
-        El.search.value = '';
-        navigate('home');
+    // Mobile Menu
+    El.hamburger.addEventListener('click', () => {
+        El.navMenu.classList.toggle('active');
+        El.hamburger.classList.toggle('open');
     });
 
-    // Scroll Effects
+    // Scroll Progress & Back to Top
     window.addEventListener('scroll', () => {
-        const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
-        const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
-        const scrolled = (winScroll / height) * 100;
-        El.progressBar.style.width = scrolled + "%";
+        const scrolled = (window.scrollY / (document.documentElement.scrollHeight - window.innerHeight)) * 100;
+        El.progressBar.style.width = `${scrolled}%`;
 
-        if (winScroll > 500) El.backToTop.style.display = 'flex';
+        if (window.scrollY > 500) El.backToTop.style.display = 'flex';
         else El.backToTop.style.display = 'none';
     });
 
@@ -381,37 +308,81 @@ function setupGlobalListeners() {
     });
 }
 
-function toggleMenu() {
-    State.isMenuOpen = !State.isMenuOpen;
-    El.hamburger.classList.toggle('open');
-    El.navMenu.classList.toggle('active');
-}
-
-function closeMenu() {
-    State.isMenuOpen = false;
-    El.hamburger.classList.remove('open');
-    El.navMenu.classList.remove('active');
-}
-
-function updateNavActiveState() {
-    document.querySelectorAll('[data-page]').forEach(link => {
-        if (link.dataset.page === State.view) link.classList.add('active');
-        else link.classList.remove('active');
+function getFilteredData() {
+    return DB.filter(item => {
+        const matchesCat = State.category === 'الكل' || item.category === State.category;
+        const matchesSearch = item.title.toLowerCase().includes(State.searchQuery) || 
+                             item.description.toLowerCase().includes(State.searchQuery);
+        return matchesCat && matchesSearch;
     });
 }
 
-function handleContact(e) {
-    e.preventDefault();
-    alert('شكراً لتواصلك معنا! سيتم الرد على رسالتك في أقرب وقت.');
-    navigate('home');
+function filterByCategory(cat) {
+    State.category = cat;
+    State.currentPage = 1;
+    State.view = 'home';
+    renderQuickCategories();
+    router();
 }
 
-// --- Utilities ---
-
-function debounce(func, wait) {
-    let timeout;
-    return function(...args) {
-        clearTimeout(timeout);
-        timeout = setTimeout(() => func.apply(this, args), wait);
-    };
+function resetFilter() {
+    State.category = 'الكل';
+    State.searchQuery = '';
+    El.search.value = '';
+    filterByCategory('الكل');
 }
+
+function setPage(p) {
+    State.currentPage = p;
+    router();
+}
+
+function nextPage() {
+    const total = getFilteredData().length;
+    if (State.currentPage < Math.ceil(total / State.perPage)) {
+        State.currentPage++;
+        router();
+    }
+}
+
+function prevPage() {
+    if (State.currentPage > 1) {
+        State.currentPage--;
+        router();
+    }
+}
+
+function openArticle(id) {
+    State.activeArticleId = id;
+    State.view = 'article';
+    router();
+}
+
+function navigate(view) {
+    State.view = view;
+    State.currentPage = 1;
+    if (view === 'home') {
+        State.category = 'الكل';
+        State.searchQuery = '';
+        El.search.value = '';
+        renderQuickCategories();
+    }
+    router();
+}
+
+function updateNavActiveState() {
+    const links = document.querySelectorAll('.nav-links a');
+    links.forEach(l => l.classList.remove('active'));
+    
+    if (State.view === 'home') links[0].classList.add('active');
+    else if (State.view === 'categories') links[1].classList.add('active');
+    else if (State.view === 'about') links[2].classList.add('active');
+}
+
+function closeMenu() {
+    El.navMenu.classList.remove('active');
+    El.hamburger.classList.remove('open');
+}
+
+// Boot the App
+init();

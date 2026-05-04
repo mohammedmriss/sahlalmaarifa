@@ -3,43 +3,40 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>مدونة المعرفة | الأخبار والفرص العربية</title>
+    <title>مدونة المعرفة الشاملة | أخبار، وظائف، تعليم وتكنولوجيا</title>
     
-    <!-- SEO & Metadata -->
-    <meta name="description" content="منصة عربية شاملة لآخر الأخبار، فرص العمل، الهجرة، والتقنيات الحديثة بأسلوب عصري وبسيط.">
-    <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <!-- SEO -->
+    <meta name="description" content="منصة عربية رائدة تقدم آخر الأخبار، فرص الشغل، دروس تعليم السياقة، وصفات طبخ، وتقارير تقنية بأسلوب عصري.">
     
     <!-- Google Fonts: Tajawal -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800&display=swap" rel="stylesheet">
     
-    <!-- Font Awesome for Icons -->
+    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <!-- Local Styles -->
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <!-- Top Progress Bar -->
     <div id="progress-bar" class="progress-bar"></div>
 
-    <!-- Main Navigation -->
+    <!-- Main Header -->
     <header class="main-header">
         <nav class="container nav-wrapper">
             <div class="logo">
-                <a href="#" id="home-logo">مدونة<span>المعرفة</span></a>
+                <a href="#" onclick="navigate('home')">مدونة<span>المعرفة</span></a>
             </div>
             
             <ul class="nav-links" id="nav-menu">
-                <li><a href="#" class="active" data-page="home">الرئيسية</a></li>
-                <li><a href="#" data-page="categories">التصنيفات</a></li>
-                <li><a href="#" data-page="about">من نحن</a></li>
-                <li><a href="#" data-page="contact">اتصل بنا</a></li>
+                <li><a href="#" class="active" onclick="navigate('home')">الرئيسية</a></li>
+                <li><a href="#" onclick="navigate('categories')">التصنيفات</a></li>
+                <li><a href="#" onclick="navigate('about')">من نحن</a></li>
             </ul>
             
             <div class="nav-actions">
-                <button class="hamburger" id="hamburger-btn" aria-label="فتح القائمة">
+                <button class="hamburger" id="hamburger-btn" aria-label="القائمة">
                     <span></span>
                     <span></span>
                     <span></span>
@@ -48,24 +45,23 @@
         </nav>
     </header>
 
-    <!-- Content Sections -->
+    <!-- Page Content -->
     <div id="page-wrapper">
         
-        <!-- Hero Section (Visible only on Home) -->
+        <!-- Hero & Search -->
         <section id="hero-section" class="hero-section">
             <div class="container">
                 <div class="hero-content">
-                    <h1>اكتشف أحدث الأخبار والفرص</h1>
-                    <p>المصدر الموثوق للوظائف، أخبار الهجرة، والتقارير الحصرية في مكان واحد</p>
+                    <h1>مرحباً بكم في منصة المعرفة</h1>
+                    <p>دليلك الشامل للأخبار، الوظائف، الهجرة، والمهارات التقنية والعملية</p>
                     
                     <div class="search-container">
                         <div class="search-box">
                             <i class="fas fa-search search-icon"></i>
-                            <input type="text" id="main-search" placeholder="ابحث عن مقال أو موضوع..." autocomplete="off">
+                            <input type="text" id="main-search" placeholder="ابحث عن مقال، وظيفة، أو موضوع..." autocomplete="off">
                         </div>
                     </div>
 
-                    <!-- Quick Categories -->
                     <div id="quick-categories" class="quick-categories">
                         <!-- Rendered by JS -->
                     </div>
@@ -73,18 +69,14 @@
             </div>
         </section>
 
-        <!-- Dynamic Content Area -->
-        <main id="app-content" class="container main-content">
-            <!-- Content will be injected here: Articles Grid, Category Grid, Pages -->
-            <div id="dynamic-area"></div>
-            
-            <!-- Pagination -->
-            <div id="pagination-ui" class="pagination-container"></div>
-            
-            <!-- Global Loader -->
-            <div id="loader" class="loader hidden">
-                <div class="spinner"></div>
+        <!-- Main Display -->
+        <main class="container main-content">
+            <div id="dynamic-area">
+                <!-- Articles Grid or Detail View -->
             </div>
+            
+            <!-- Pagination UI -->
+            <div id="pagination-ui" class="pagination-container"></div>
         </main>
     </div>
 
@@ -92,37 +84,27 @@
     <footer class="main-footer">
         <div class="container">
             <div class="footer-grid">
-                <div class="footer-brand">
+                <div class="footer-info">
                     <div class="logo">مدونة<span>المعرفة</span></div>
-                    <p>منصة معرفية عربية تهدف إلى إغناء المحتوى الرقمي وتوفير معلومات دقيقة حول سوق الشغل، الهجرة، والتكنولوجيا.</p>
-                    <div class="footer-social">
-                        <a href="#" title="فيسبوك"><i class="fab fa-facebook-f"></i></a>
-                        <a href="#" title="تويتر"><i class="fab fa-twitter"></i></a>
-                        <a href="#" title="إنستغرام"><i class="fab fa-instagram"></i></a>
-                        <a href="#" title="لينكد إن"><i class="fab fa-linkedin-in"></i></a>
-                    </div>
+                    <p>أكبر منصة عربية للمحتوى الهادف والموثوق. نغطي مجالات متنوعة من الأخبار إلى الحرف والتعليم.</p>
                 </div>
-                
-                <div class="footer-nav">
+                <div class="footer-links">
                     <h4>روابط سريعة</h4>
                     <ul>
-                        <li><a href="#" data-page="home">الرئيسية</a></li>
-                        <li><a href="#" data-page="categories">التصنيفات</a></li>
-                        <li><a href="#" data-page="about">من نحن</a></li>
-                        <li><a href="#" data-page="contact">اتصل بنا</a></li>
+                        <li><a href="#" onclick="navigate('home')">الرئيسية</a></li>
+                        <li><a href="#" onclick="navigate('categories')">التصنيفات</a></li>
+                        <li><a href="#">سياسة الخصوصية</a></li>
                     </ul>
                 </div>
-                
-                <div class="footer-legal">
-                    <h4>قانوني</h4>
-                    <ul>
-                        <li><a href="#">سياسة الخصوصية</a></li>
-                        <li><a href="#">شروط الخدمة</a></li>
-                        <li><a href="#">ملفات تعريف الارتباط</a></li>
-                    </ul>
+                <div class="footer-social">
+                    <h4>تابعنا</h4>
+                    <div class="social-icons">
+                        <a href="#"><i class="fab fa-facebook"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                    </div>
                 </div>
             </div>
-            
             <div class="footer-bottom">
                 <p>&copy; 2026 مدونة المعرفة. جميع الحقوق محفوظة.</p>
             </div>
@@ -130,11 +112,10 @@
     </footer>
 
     <!-- Back to Top -->
-    <button id="back-to-top" class="back-to-top" title="العودة للأعلى">
-        <i class="fas fa-arrow-up"></i>
+    <button id="back-to-top" class="back-to-top">
+        <i class="fas fa-chevron-up"></i>
     </button>
 
-    <!-- Scripts -->
     <script src="script.js"></script>
 </body>
 </html>
