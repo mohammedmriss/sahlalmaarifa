@@ -2,34 +2,16 @@ backend:
   name: git-gateway
   branch: main
 
-media_folder: assets/img
-public_folder: /assets/img
+media_folder: "images/uploads"
+public_folder: "/images/uploads"
 
 collections:
-  - name: blog
-    label: المقالات
-    folder: _posts
+  - name: "articles"
+    label: "Articles"
+    folder: "content"
     create: true
-    slug: "{{slug}}"
     fields:
-      - { label: "Title", name: "title", widget: "string" }
-      - { label: "Publish Date", name: "date", widget: "datetime" }
-      - {
-          label: "Category",
-          name: "category",
-          widget: "select",
-          options:
-            [
-              "أخبار",
-              "وظائف",
-              "الهجرة",
-              "الطبخ",
-              "تعليم السياقة",
-              "رياضة",
-              "أفلام ومسلسلات",
-              "الربح من الإنترنت",
-              "إصلاح الإلكترونيات",
-            ],
-        }
-      - { label: "Featured Image", name: "image", widget: "image" }
-      - { label: "Body", name: "body", widget: "markdown" }
+      - { name: "title", label: "Title", widget: "string" }
+      - { name: "date", label: "Date", widget: "datetime" }
+      - { name: "image", label: "Image", widget: "image" }
+      - { name: "body", label: "Content", widget: "markdown" }
