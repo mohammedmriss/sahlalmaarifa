@@ -68,7 +68,7 @@ const Categories = [
 
 // --- Application State ---
 let State = {
-    view: 'home', // 'home', 'article', 'categories', 'about'
+    view: 'home', // 'home', 'article', 'categories', 'about', 'privacy', 'contact'
     category: 'الكل',
     searchQuery: '',
     currentPage: 1,
@@ -113,6 +113,12 @@ function router() {
     } else if (State.view === 'about') {
         El.hero.classList.add('hidden');
         renderAboutPage();
+    } else if (State.view === 'privacy') {
+        El.hero.classList.add('hidden');
+        renderPrivacyPage();
+    } else if (State.view === 'contact') {
+        El.hero.classList.add('hidden');
+        renderContactPage();
     }
     
     updateNavActiveState();
@@ -273,6 +279,88 @@ function renderAboutPage() {
     `;
 }
 
+function renderPrivacyPage() {
+    El.pagination.innerHTML = '';
+    El.dynamicArea.innerHTML = `
+        <div class="detail-view" style="padding: 60px;">
+            <h2 style="text-align:center; margin-bottom:30px;">سياسة الخصوصية</h2>
+            <div class="article-body privacy-content">
+                <h3>مقدمة عن الخصوصية</h3>
+                <p>نحن في مدونة المعرفة نولي أهمية قصوى لخصوصية زوارنا. تصف هذه الوثيقة أنواع المعلومات الشخصية التي نجمعها وكيفية استخدامها.</p>
+
+                <h3>ما هي البيانات التي نجمعها</h3>
+                <p>نجمع معلومات محدودة عند تفاعلك مع موقعنا، بما في ذلك:</p>
+                <ul>
+                    <li>المعلومات التي تقدمها عند الاتصال بنا (الاسم، البريد الإلكتروني).</li>
+                    <li>بيانات التصفح التقنية (عنوان IP، نوع المتصفح).</li>
+                </ul>
+
+                <h3>كيفية استخدام البيانات</h3>
+                <p>نستخدم البيانات التي نجمعها لـ:</p>
+                <ul>
+                    <li>تحسين تجربة المستخدم على الموقع.</li>
+                    <li>الرد على استفساراتكم ورسائلكم.</li>
+                    <li>إرسال تحديثات إخبارية في حال اشتراككم في القائمة البريدية.</li>
+                </ul>
+
+                <h3>ملفات تعريف الارتباط (Cookies)</h3>
+                <p>نستخدم ملفات تعريف الارتباط لتحسين أداء الموقع وتخصيص المحتوى. يمكنك اختيار تعطيل هذه الملفات من إعدادات متصفحك.</p>
+
+                <h3>حماية المعلومات</h3>
+                <p>نحن نطبق مجموعة من الإجراءات الأمنية لضمان سلامة معلوماتك الشخصية ومنع الوصول غير المصرح به.</p>
+
+                <h3>حقوق المستخدم</h3>
+                <p>لك الحق في الوصول إلى بياناتك الشخصية، أو طلب تصحيحها، أو حذفها من سجلاتنا في أي وقت.</p>
+
+                <h3>التعديلات على السياسة</h3>
+                <p>قد نقوم بتحديث سياسة الخصوصية هذه من وقت لآخر. سيتم نشر أي تغييرات في هذه الصفحة.</p>
+
+                <h3>معلومات التواصل</h3>
+                <p>إذا كان لديك أي أسئلة حول سياسة الخصوصية، يرجى التواصل معنا عبر صفحة "اتصل بنا".</p>
+            </div>
+        </div>
+    `;
+}
+
+function renderContactPage() {
+    El.pagination.innerHTML = '';
+    El.dynamicArea.innerHTML = `
+        <div class="detail-view" style="padding: 60px;">
+            <div style="text-align:center; margin-bottom:40px;">
+                <h2>اتصل بنا</h2>
+                <p>يسعدنا دائماً سماع آرائكم واستفساراتكم. سنرد عليكم في أقرب وقت ممكن.</p>
+            </div>
+            
+            <form class="contact-form" onsubmit="event.preventDefault(); alert('تم إرسال رسالتك بنجاح!'); this.reset();">
+                <div class="form-group">
+                    <label for="name">الاسم</label>
+                    <input type="text" id="name" placeholder="أدخل اسمك الكامل" required>
+                </div>
+                <div class="form-group">
+                    <label for="email">البريد الإلكتروني</label>
+                    <input type="email" id="email" placeholder="example@mail.com" required>
+                </div>
+                <div class="form-group">
+                    <label for="message">الرسالة</label>
+                    <textarea id="message" rows="6" placeholder="اكتب رسالتك هنا..." required></textarea>
+                </div>
+                <button type="submit" class="btn-submit">إرسال الرسالة</button>
+            </form>
+
+            <div class="contact-info-grid">
+                <div class="info-item">
+                    <i class="fas fa-envelope"></i>
+                    <p>contact@maarifablog.com</p>
+                </div>
+                <div class="info-item">
+                    <i class="fas fa-phone-alt"></i>
+                    <p>+212 600 000 000</p>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
 // --- Event Handlers & Helpers ---
 
 function setupEventListeners() {
@@ -377,6 +465,8 @@ function updateNavActiveState() {
     if (State.view === 'home') links[0].classList.add('active');
     else if (State.view === 'categories') links[1].classList.add('active');
     else if (State.view === 'about') links[2].classList.add('active');
+    else if (State.view === 'privacy') links[3].classList.add('active');
+    else if (State.view === 'contact') links[4].classList.add('active');
 }
 
 function closeMenu() {
