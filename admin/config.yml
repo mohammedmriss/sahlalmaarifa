@@ -1,17 +1,20 @@
 backend:
   name: git-gateway
-  branch: main
+  branch: main # Ensure this matches your default branch
 
-media_folder: "images/uploads"
-public_folder: "/images/uploads"
+media_folder: "assets/img" # Where images will be stored in repo
+public_folder: "/assets/img" # Where images will be linked in HTML
 
 collections:
-  - name: "articles"
-    label: "Articles"
-    folder: "content"
+  - name: "blog"
+    label: "المقالات"
+    folder: "_posts" # Folder where markdown files will be saved
     create: true
     slug: "{{slug}}"
     fields:
-      - { name: "title", label: "Title", widget: "string" }
-      - { name: "date", label: "Date", widget: "datetime" }
-      - { name: "body", label: "Content", widget: "markdown" }
+      - { label: "العنوان", name: "title", widget: "string" }
+      - { label: "تاريخ النشر", name: "date", widget: "datetime" }
+      - { label: "التصنيف", name: "category", widget: "select", options: ["أخبار", "وظائف", "الهجرة", "الطبخ", "تعليم السياقة", "رياضة", "أفلام ومسلسلات", "الربح من الإنترنت", "إصلاح الإلكترونيات"] }
+      - { label: "الصورة البارزة", name: "image", widget: "image" }
+      - { label: "الوصف المختصر", name: "description", widget: "text" }
+      - { label: "محتوى المقال", name: "body", widget: "markdown" }
