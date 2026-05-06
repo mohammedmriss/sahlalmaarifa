@@ -10,8 +10,8 @@ collections:
     label: "Articles"
     folder: "content"
     create: true
+    slug: "{{slug}}"
     fields:
       - { name: "title", label: "Title", widget: "string" }
       - { name: "date", label: "Date", widget: "datetime" }
-      - { name: "image", label: "Image", widget: "image" }
       - { name: "body", label: "Content", widget: "markdown" }
