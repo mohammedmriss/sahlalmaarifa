@@ -26,15 +26,16 @@
     <header class="main-header">
         <nav class="container nav-wrapper">
             <div class="logo">
-                <a href="#" onclick="navigate('home')">مدونة<span>المعرفة</span></a>
+                <a href="index.html">مدونة<span>المعرفة</span></a>
             </div>
             
             <ul class="nav-links" id="nav-menu">
-                <li><a href="#" class="active" onclick="navigate('home')">الرئيسية</a></li>
-                <li><a href="#" onclick="navigate('categories')">التصنيفات</a></li>
-                <li><a href="#" onclick="navigate('about')">من نحن</a></li>
-                <li><a href="#" onclick="navigate('privacy')">سياسة الخصوصية</a></li>
-                <li><a href="#" onclick="navigate('contact')">اتصل بنا</a></li>
+                <li><a href="index.html" class="active">الرئيسية</a></li>
+                <li><a href="categories.html">التصنيفات</a></li>
+                <li><a href="akhbar.html">أخبار</a></li>
+                <li><a href="wazaef.html">وظائف</a></li>
+                <li><a href="about.html">من نحن</a></li>
+                <li><a href="contact.html">اتصل بنا</a></li>
             </ul>
             
             <div class="nav-actions">
@@ -65,7 +66,17 @@
                     </div>
 
                     <div id="quick-categories" class="quick-categories">
-                        <!-- Rendered by JS -->
+                        <a href="akhbar.html" class="pill">أخبار</a>
+                        <a href="wazaef.html" class="pill">وظائف</a>
+                        <a href="hijra.html" class="pill">الهجرة</a>
+                        <a href="riyada.html" class="pill">رياضة</a>
+                        <a href="tabkh.html" class="pill">الطبخ</a>
+                        <a href="siya9a.html" class="pill">تعليم السياقة</a>
+                        <a href="aflam.html" class="pill">أفلام</a>
+                        <a href="ribh.html" class="pill">ربح المال</a>
+                        <a href="hiraf.html" class="pill">حرف ومشاريع</a>
+                        <a href="wataik.html" class="pill">وثائق إدارية</a>
+                        <a href="islah.html" class="pill">إصلاح</a>
                     </div>
                 </div>
             </div>
@@ -74,7 +85,103 @@
         <!-- Main Display -->
         <main class="container main-content">
             <div id="dynamic-area">
-                <!-- Articles Grid or Detail View -->
+                <div class="articles-grid">
+                    <!-- الأخبار -->
+                    <article class="card">
+                        <div class="card-img-container">
+                            <img src="https://images.unsplash.com/photo-1466611653911-95282ee3656d?w=600" alt="المغرب يطلق استراتيجية جديدة للطاقة المتجددة" class="card-img" loading="lazy">
+                            <span class="card-badge">أخبار</span>
+                        </div>
+                        <div class="card-body">
+                            <div class="card-date"><i class="far fa-calendar-alt"></i> 10 مايو 2026</div>
+                            <h3>المغرب يطلق استراتيجية جديدة للطاقة المتجددة</h3>
+                            <p>تهدف الاستراتيجية إلى تحقيق استقلال طاقي كامل بنسبة 52% بحلول عام 2030.</p>
+                            <a href="akhbar.html" class="btn-read">
+                                اقرأ المزيد <i class="fas fa-arrow-left"></i>
+                            </a>
+                        </div>
+                    </article>
+
+                    <!-- وظائف -->
+                    <article class="card">
+                        <div class="card-img-container">
+                            <img src="https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=600" alt="مطلوب مهندسي برمجيات للعمل عن بعد" class="card-img" loading="lazy">
+                            <span class="card-badge">وظائف</span>
+                        </div>
+                        <div class="card-body">
+                            <div class="card-date"><i class="far fa-calendar-alt"></i> 11 مايو 2026</div>
+                            <h3>مطلوب مهندسي برمجيات للعمل عن بعد</h3>
+                            <p>شركة تقنية عالمية تبحث عن مطورين في تخصصات Full Stack و AI.</p>
+                            <a href="wazaef.html" class="btn-read">
+                                اقرأ المزيد <i class="fas fa-arrow-left"></i>
+                            </a>
+                        </div>
+                    </article>
+
+                    <!-- الهجرة -->
+                    <article class="card">
+                        <div class="card-img-container">
+                            <img src="https://images.unsplash.com/photo-1506710507565-203b9f24669b?w=600" alt="تحديثات نظام الهجرة الكندي لعام 2026" class="card-img" loading="lazy">
+                            <span class="card-badge">الهجرة</span>
+                        </div>
+                        <div class="card-body">
+                            <div class="card-date"><i class="far fa-calendar-alt"></i> 12 مايو 2026</div>
+                            <h3>تحديثات نظام الهجرة الكندي لعام 2026</h3>
+                            <p>تسهيلات جديدة في معالجة طلبات الإقامة الدائمة للعمال المهرة.</p>
+                            <a href="hijra.html" class="btn-read">
+                                اقرأ المزيد <i class="fas fa-arrow-left"></i>
+                            </a>
+                        </div>
+                    </article>
+
+                    <!-- رياضة -->
+                    <article class="card">
+                        <div class="card-img-container">
+                            <img src="https://images.unsplash.com/photo-1508098682722-e99c43a406b2?w=600" alt="نتائج قرعة دوري أبطال أفريقيا" class="card-img" loading="lazy">
+                            <span class="card-badge">رياضة</span>
+                        </div>
+                        <div class="card-body">
+                            <div class="card-date"><i class="far fa-calendar-alt"></i> 13 مايو 2026</div>
+                            <h3>نتائج قرعة دوري أبطال أفريقيا</h3>
+                            <p>مواجهات نارية مرتقبة بين كبار الأندية العربية في دور المجموعات.</p>
+                            <a href="riyada.html" class="btn-read">
+                                اقرأ المزيد <i class="fas fa-arrow-left"></i>
+                            </a>
+                        </div>
+                    </article>
+
+                    <!-- الطبخ -->
+                    <article class="card">
+                        <div class="card-img-container">
+                            <img src="https://images.unsplash.com/photo-1541518763669-27fef04b14ea?w=600" alt="طريقة تحضير الطجين المغربي الأصيل" class="card-img" loading="lazy">
+                            <span class="card-badge">الطبخ</span>
+                        </div>
+                        <div class="card-body">
+                            <div class="card-date"><i class="far fa-calendar-alt"></i> 14 مايو 2026</div>
+                            <h3>طريقة تحضير الطجين المغربي الأصيل</h3>
+                            <p>أسرار النكهة المغربية التقليدية وطريقة طهي اللحم مع البرقوق.</p>
+                            <a href="tabkh.html" class="btn-read">
+                                اقرأ المزيد <i class="fas fa-arrow-left"></i>
+                            </a>
+                        </div>
+                    </article>
+
+                    <!-- تعليم السياقة -->
+                    <article class="card">
+                        <div class="card-img-container">
+                            <img src="https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?w=600" alt="دليل رخصة السياقة صنف B" class="card-img" loading="lazy">
+                            <span class="card-badge">تعليم السياقة</span>
+                        </div>
+                        <div class="card-body">
+                            <div class="card-date"><i class="far fa-calendar-alt"></i> 15 مايو 2026</div>
+                            <h3>دليل رخصة السياقة صنف B (سيارات)</h3>
+                            <p>شرح كامل لقواعد السير وأهم الأسئلة المتكررة في الامتحان النظري.</p>
+                            <a href="siya9a.html" class="btn-read">
+                                اقرأ المزيد <i class="fas fa-arrow-left"></i>
+                            </a>
+                        </div>
+                    </article>
+                </div>
             </div>
             
             <!-- Pagination UI -->
@@ -93,11 +200,11 @@
                 <div class="footer-links">
                     <h4>روابط سريعة</h4>
                     <ul>
-                        <li><a href="#" onclick="navigate('home')">الرئيسية</a></li>
-                        <li><a href="#" onclick="navigate('categories')">التصنيفات</a></li>
-                        <li><a href="#" onclick="navigate('about')">من نحن</a></li>
-                        <li><a href="#" onclick="navigate('privacy')">سياسة الخصوصية</a></li>
-                        <li><a href="#" onclick="navigate('contact')">اتصل بنا</a></li>
+                        <li><a href="index.html">الرئيسية</a></li>
+                        <li><a href="categories.html">التصنيفات</a></li>
+                        <li><a href="about.html">من نحن</a></li>
+                        <li><a href="privacy.html">سياسة الخصوصية</a></li>
+                        <li><a href="contact.html">اتصل بنا</a></li>
                     </ul>
                 </div>
                 <div class="footer-social">
