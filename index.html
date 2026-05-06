@@ -228,6 +228,40 @@
         <i class="fas fa-chevron-up"></i>
     </button>
 
+    <script>
+        // Dynamic Article Loader for Homepage
+        async function loadArticles() {
+            try {
+                const response = await fetch('articles.json');
+                const articles = await response.json();
+                renderArticles(articles);
+            } catch (err) {
+                console.error('Error loading articles:', err);
+            }
+        }
+
+        function renderArticles(articles) {
+            const grid = document.querySelector('.articles-grid');
+            grid.innerHTML = articles.map(art => `
+                <article class="card">
+                    <div class="card-img-container">
+                        <img src="${art.image}" alt="${art.title}" class="card-img" loading="lazy">
+                        <span class="card-badge">${art.category}</span>
+                    </div>
+                    <div class="card-body">
+                        <div class="card-date"><i class="far fa-calendar-alt"></i> ${new Date(art.date).toLocaleDateString('ar-EG')}</div>
+                        <h3>${art.title}</h3>
+                        <p>${art.content.replace(/<[^>]*>/g, '').substring(0, 100)}...</p>
+                        <a href="article.html?id=${art.id}" class="btn-read">
+                            اقرأ المزيد <i class="fas fa-arrow-left"></i>
+                        </a>
+                    </div>
+                </article>
+            `).join('');
+        }
+
+        document.addEventListener('DOMContentLoaded', loadArticles);
+    </script>
     <script src="script.js"></script>
 </body>
 </html>

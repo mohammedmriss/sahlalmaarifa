@@ -1,20 +1,25 @@
 backend:
   name: git-gateway
-  branch: main # Ensure this matches your default branch
+  branch: main
 
-media_folder: "assets/img" # Where images will be stored in repo
-public_folder: "/assets/img" # Where images will be linked in HTML
+media_folder: "assets/img"
+public_folder: "/assets/img"
 
 collections:
-  - name: "blog"
-    label: "المقالات"
-    folder: "_posts" # Folder where markdown files will be saved
-    create: true
-    slug: "{{slug}}"
-    fields:
-      - { label: "العنوان", name: "title", widget: "string" }
-      - { label: "تاريخ النشر", name: "date", widget: "datetime" }
-      - { label: "التصنيف", name: "category", widget: "select", options: ["أخبار", "وظائف", "الهجرة", "الطبخ", "تعليم السياقة", "رياضة", "أفلام ومسلسلات", "الربح من الإنترنت", "إصلاح الإلكترونيات"] }
-      - { label: "الصورة البارزة", name: "image", widget: "image" }
-      - { label: "الوصف المختصر", name: "description", widget: "text" }
-      - { label: "محتوى المقال", name: "body", widget: "markdown" }
+  - name: "data"
+    label: "البيانات"
+    files:
+      - label: "المقالات"
+        name: "articles"
+        file: "articles.json"
+        fields:
+          - name: articles
+            label: "قائمة المقالات"
+            widget: "list"
+            fields:
+              - { label: "المعرف (رقم)", name: "id", widget: "number", value_type: "int" }
+              - { label: "العنوان", name: "title", widget: "string" }
+              - { label: "التصنيف", name: "category", widget: "select", options: ["أخبار", "وظائف", "الهجرة", "الطبخ", "تعليم السياقة", "رياضة", "أفلام ومسلسلات", "الربح من الإنترنت", "إصلاح الإلكترونيات"] }
+              - { label: "التاريخ", name: "date", widget: "datetime" }
+              - { label: "الصورة", name: "image", widget: "image" }
+              - { label: "المحتوى (HTML)", name: "content", widget: "markdown" }
