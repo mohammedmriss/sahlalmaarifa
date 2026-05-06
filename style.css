@@ -82,6 +82,7 @@ img {
 
 .logo span {
     color: var(--primary);
+    margin-right: 10px;
 }
 
 .nav-links {

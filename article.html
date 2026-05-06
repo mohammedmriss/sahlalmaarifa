@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title id="page-title">مقال | مدونة سهل المعرفة الشاملة</title>
+    
+    <!-- Google Fonts: Tajawal -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="progress-bar" class="progress-bar"></div>
+
+    <header class="main-header">
+        <nav class="container nav-wrapper">
+            <div class="logo">
+                <a href="index.html">مدونة<span>سهل المعرفة</span></a>
+            </div>
+            <ul class="nav-links" id="nav-menu">
+                <li><a href="index.html">الرئيسية</a></li>
+                <li><a href="categories.html">التصنيفات</a></li>
+                <li><a href="about.html">من نحن</a></li>
+                <li><a href="contact.html">اتصل بنا</a></li>
+            </ul>
+            <div class="nav-actions">
+                <button class="hamburger" id="hamburger-btn" aria-label="القائمة">
+                    <span></span><span></span><span></span>
+                </button>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container main-content">
+        <div id="article-view" class="detail-view" style="display: none;">
+            <header class="detail-header">
+                <div id="article-category" class="card-badge" style="display: inline-block; margin-bottom: 15px;"></div>
+                <h1 id="article-title" style="margin-bottom: 15px;"></h1>
+                <div class="card-date" id="article-date">
+                    <i class="far fa-calendar-alt"></i> <span></span>
+                </div>
+            </header>
+
+            <div class="detail-img" style="margin: 30px 0; border-radius: 15px; overflow: hidden;">
+                <img id="article-image" src="" alt="" style="width: 100%; height: auto; display: block;">
+            </div>
+
+            <div class="detail-content" style="background: white; padding: 40px; border-radius: 15px; line-height: 1.8;">
+                <div id="article-content" class="article-body" style="font-size: 1.2rem; color: var(--text-main);">
+                    <!-- Content will be injected here -->
+                </div>
+                
+                <div class="share-box" style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #eee;">
+                    <h4 style="margin-bottom: 15px;">شارك المقال:</h4>
+                    <div class="social-icons" style="display: flex; gap: 15px;">
+                        <a href="#" style="font-size: 1.5rem; color: #1877f2;"><i class="fab fa-facebook"></i></a>
+                        <a href="#" style="font-size: 1.5rem; color: #1da1f2;"><i class="fab fa-twitter"></i></a>
+                        <a href="#" style="font-size: 1.5rem; color: #25d366;"><i class="fab fa-whatsapp"></i></a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="back-action" style="margin-top: 40px; text-align: center;">
+                <a href="index.html" class="btn-read" style="display: inline-flex; align-items: center; gap: 10px;">
+                    <i class="fas fa-arrow-right"></i> العودة للرئيسية
+                </a>
+            </div>
+        </div>
+
+        <div id="not-found" style="display: none; text-align: center; padding: 100px 20px;">
+            <i class="fas fa-exclamation-triangle" style="font-size: 4rem; color: var(--accent); margin-bottom: 20px;"></i>
+            <h2>عذراً، المقال غير موجود</h2>
+            <p>ربما تم حذفه أو أن الرابط غير صحيح.</p>
+            <br>
+            <a href="index.html" class="btn-read">العودة للرئيسية</a>
+        </div>
+    </main>
+
+    <footer class="main-footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-info">
+                    <div class="logo">مدونة<span>سهل المعرفة</span></div>
+                    <p>أكبر منصة عربية للمحتوى الهادف والموثوق. نغطي مجالات متنوعة من الأخبار إلى الحرف والتعليم.</p>
+                </div>
+                <div class="footer-links">
+                    <h4>روابط سريعة</h4>
+                    <ul>
+                        <li><a href="index.html">الرئيسية</a></li>
+                        <li><a href="categories.html">التصنيفات</a></li>
+                        <li><a href="about.html">من نحن</a></li>
+                        <li><a href="privacy.html">سياسة الخصوصية</a></li>
+                        <li><a href="contact.html">اتصل بنا</a></li>
+                    </ul>
+                </div>
+                <div class="footer-social">
+                    <h4>تابعنا</h4>
+                    <div class="social-icons">
+                        <a href="#"><i class="fab fa-facebook"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 مدونة سهل المعرفة. جميع الحقوق محفوظة.</p>
+            </div>
+        </div>
+    </footer>
+
+    <button id="back-to-top" class="back-to-top"><i class="fas fa-chevron-up"></i></button>
+
+    <!-- Data & Loader Script -->
+    <script src="articles-data.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const params = new URLSearchParams(window.location.search);
+            const id = parseInt(params.get('id'));
+            
+            if (isNaN(id)) {
+                showError();
+                return;
+            }
+
+            // Find article in global 'articles' array
+            const article = articles.find(a => a.id === id);
+            
+            if (article) {
+                renderArticle(article);
+            } else {
+                showError();
+            }
+        });
+
+        function renderArticle(data) {
+            document.getElementById('page-title').textContent = `${data.title} | مدونة سهل المعرفة`;
+            document.getElementById('article-title').textContent = data.title;
+            document.getElementById('article-category').textContent = data.category;
+            document.getElementById('article-date').querySelector('span').textContent = data.date;
+            document.getElementById('article-image').src = data.image;
+            document.getElementById('article-image').alt = data.title;
+            document.getElementById('article-content').innerHTML = data.content;
+            
+            document.getElementById('article-view').style.display = 'block';
+            document.getElementById('not-found').style.display = 'none';
+        }
+
+        function showError() {
+            document.getElementById('article-view').style.display = 'none';
+            document.getElementById('not-found').style.display = 'block';
+        }
+    </script>
+    <script src="script.js"></script>
+</body>
+</html>
