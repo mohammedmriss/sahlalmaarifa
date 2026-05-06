@@ -189,6 +189,43 @@
         <i class="fas fa-chevron-up"></i>
     </button>
 
+    <script>
+        async function loadCategoryArticles() {
+            try {
+                const response = await fetch('articles.json');
+                const data = await response.json();
+                const filtered = data.posts.filter(a => a.category === 'الوثائق الإدارية');
+                renderArticles(filtered);
+            } catch (err) {
+                console.error('Error:', err);
+            }
+        }
+
+        function renderArticles(list) {
+            const grid = document.querySelector('.articles-grid');
+            if (list.length === 0) {
+                grid.innerHTML = '<p style="text-align:center; grid-column: 1/-1;">لا توجد مقالات في هذا القسم حالياً.</p>';
+                return;
+            }
+            grid.innerHTML = list.map(art => `
+                <article class="card">
+                    <div class="card-img-container">
+                        <img src="${art.image}" alt="${art.title}" class="card-img" loading="lazy">
+                        <span class="card-badge">${art.category}</span>
+                    </div>
+                    <div class="card-body">
+                        <div class="card-date"><i class="far fa-calendar-alt"></i> ${new Date(art.date).toLocaleDateString('ar-EG')}</div>
+                        <h3>${art.title}</h3>
+                        <p>${art.content.replace(/<[^>]*>/g, '').substring(0, 100)}...</p>
+                        <a href="article.html?id=${art.id}" class="btn-read">
+                            اقرأ المزيد <i class="fas fa-arrow-left"></i>
+                        </a>
+                    </div>
+                </article>
+            `).join('');
+        }
+        document.addEventListener('DOMContentLoaded', loadCategoryArticles);
+    </script>
     <script src="script.js"></script>
 </body>
 </html>

@@ -233,8 +233,8 @@
         async function loadArticles() {
             try {
                 const response = await fetch('articles.json');
-                const articles = await response.json();
-                renderArticles(articles);
+                const data = await response.json();
+                renderArticles(data.posts);
             } catch (err) {
                 console.error('Error loading articles:', err);
             }

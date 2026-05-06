@@ -1,19 +1,19 @@
 backend:
   name: git-gateway
-  branch: main
+  branch: main # Change to 'master' if your repo uses it
 
 media_folder: "assets/img"
 public_folder: "/assets/img"
 
 collections:
-  - name: "data"
-    label: "البيانات"
+  - name: "content"
+    label: "المحتوى"
     files:
       - label: "المقالات"
         name: "articles"
         file: "articles.json"
         fields:
-          - name: articles
+          - name: "posts"
             label: "قائمة المقالات"
             widget: "list"
             fields:
@@ -22,4 +22,4 @@ collections:
               - { label: "التصنيف", name: "category", widget: "select", options: ["أخبار", "وظائف", "الهجرة", "الطبخ", "تعليم السياقة", "رياضة", "أفلام ومسلسلات", "الربح من الإنترنت", "إصلاح الإلكترونيات"] }
               - { label: "التاريخ", name: "date", widget: "datetime" }
               - { label: "الصورة", name: "image", widget: "image" }
-              - { label: "المحتوى (HTML)", name: "content", widget: "markdown" }
+              - { label: "محتوى المقال", name: "content", widget: "markdown" }

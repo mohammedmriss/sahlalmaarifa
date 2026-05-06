@@ -129,8 +129,8 @@
 
             try {
                 const response = await fetch('articles.json');
-                const articles = await response.json();
-                const article = articles.find(a => a.id === id);
+                const data = await response.json();
+                const article = data.posts.find(a => a.id === id);
                 
                 if (article) {
                     renderArticle(article);
