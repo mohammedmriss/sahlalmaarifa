@@ -1,13 +1,21 @@
 /**
  * script.js - Centralized Blog Engine
- * Optimized for GitHub Pages & Vanilla JS
+ * Optimized for GitHub Pages & Custom Domains
  */
 
-// 1. Global State & Configuration
+// 1. Global State & Robust Path Detection
 const BlogState = {
     isInitialized: false,
     allArticles: [],
-    basePath: window.location.pathname.includes('/categories/') ? '../' : './'
+    // Robustly find the root directory where script.js and articles.json live
+    rootPath: (function() {
+        const script = document.currentScript;
+        if (script && script.src) {
+            return script.src.substring(0, script.src.lastIndexOf('/') + 1);
+        }
+        // Fallback for edge cases
+        return window.location.origin + '/';
+    })()
 };
 
 const El = {
@@ -27,9 +35,11 @@ async function init() {
     BlogState.isInitialized = true;
 
     console.log("🚀 Blog Engine Initializing...");
+    console.log("📂 Root Path Detected:", BlogState.rootPath);
+    
     setupUI();
     
-    // Determine which page logic to run
+    // Determine page type
     const path = window.location.pathname;
     const page = path.split("/").pop() || 'index.html';
 
@@ -40,22 +50,21 @@ async function init() {
             await handleArticleList(page);
         }
     } catch (err) {
-        console.error("❌ Initialization Error:", err);
+        console.error("❌ Initialization Failed:", err);
+        showGenericError(err.message);
     }
 }
 
 // 3. UI Helpers
 function setupUI() {
-    // Mobile Menu
     if (El.hamburger && El.navMenu) {
-        El.hamburger.addEventListener('click', (e) => {
+        El.hamburger.onclick = (e) => {
             e.stopPropagation();
             El.navMenu.classList.toggle('active');
             El.hamburger.classList.toggle('open');
-        });
+        };
     }
 
-    // Close menu when clicking outside
     document.addEventListener('click', (e) => {
         if (El.navMenu?.classList.contains('active')) {
             if (!El.navMenu.contains(e.target) && !El.hamburger.contains(e.target)) {
@@ -64,7 +73,6 @@ function setupUI() {
         }
     });
 
-    // Scroll Effects
     window.addEventListener('scroll', () => {
         if (El.progressBar) {
             const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
@@ -72,24 +80,13 @@ function setupUI() {
             const scrolled = (winScroll / height) * 100;
             El.progressBar.style.width = scrolled + "%";
         }
-
         if (El.backToTop) {
-            if (window.scrollY > 500) El.backToTop.style.display = 'flex';
-            else El.backToTop.style.display = 'none';
+            El.backToTop.style.display = window.scrollY > 500 ? 'flex' : 'none';
         }
     });
 
     if (El.backToTop) {
-        El.backToTop.addEventListener('click', () => {
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        });
-    }
-
-    // Search Redirect (Mockup)
-    if (El.search) {
-        El.search.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') alert('البحث سيتوفر قريباً!');
-        });
+        El.backToTop.onclick = () => window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 }
 
@@ -102,24 +99,28 @@ function closeMenu() {
 async function fetchArticles() {
     if (BlogState.allArticles.length > 0) return BlogState.allArticles;
     
-    const fetchPath = `${BlogState.basePath}articles.json`;
-    console.log(`📡 Fetching data from: ${fetchPath}`);
+    const fetchUrl = `${BlogState.rootPath}articles.json`;
+    console.log(`📡 Fetching data from: ${fetchUrl}`);
     
-    const response = await fetch(fetchPath);
-    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-    
-    const data = await response.json();
-    BlogState.allArticles = data.posts || [];
-    return BlogState.allArticles;
+    try {
+        const response = await fetch(fetchUrl);
+        if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        
+        const data = await response.json();
+        BlogState.allArticles = data.posts || [];
+        return BlogState.allArticles;
+    } catch (err) {
+        console.error("🚨 Fetch Error:", err);
+        throw new Error("تعذر تحميل البيانات. يرجى التأكد من وجود ملف articles.json في الجذر.");
+    }
 }
 
-// 5. List View Handler (Home & Categories)
+// 5. List View Handler
 async function handleArticleList(page) {
     if (!El.grid) return;
 
     const articles = await fetchArticles();
     
-    // Define Category Map
     const categoryMap = {
         'akhbar.html': 'أخبار',
         'wazaef.html': 'وظائف',
@@ -138,7 +139,6 @@ async function handleArticleList(page) {
     const targetCategory = categoryMap[page];
 
     if (targetCategory) {
-        console.log(`📂 Filtering for category: ${targetCategory}`);
         filtered = articles.filter(a => 
             a.category.trim().toLowerCase() === targetCategory.trim().toLowerCase()
         );
@@ -152,19 +152,13 @@ async function handleArticleDetail() {
     const params = new URLSearchParams(window.location.search);
     const id = parseInt(params.get('id'));
     
-    if (isNaN(id)) {
-        showArticleError();
-        return;
-    }
+    if (isNaN(id)) return showArticleError();
 
     const articles = await fetchArticles();
     const article = articles.find(a => a.id === id);
 
-    if (article) {
-        renderFullArticle(article);
-    } else {
-        showArticleError();
-    }
+    if (article) renderFullArticle(article);
+    else showArticleError();
 }
 
 // 7. Rendering Engine
@@ -181,11 +175,9 @@ function renderArticles(list) {
         return;
     }
 
-    // Sort by date (newest first)
     const sorted = [...list].sort((a, b) => new Date(b.date) - new Date(a.date));
 
-    // Avoid multiple innerHTML resets if possible, but for a clean start:
-    const html = sorted.map(art => `
+    El.grid.innerHTML = sorted.map(art => `
         <article class="card">
             <div class="card-img-container">
                 <img src="${art.image}" alt="${art.title}" class="card-img" loading="lazy">
@@ -195,33 +187,31 @@ function renderArticles(list) {
                 <div class="card-date"><i class="far fa-calendar-alt"></i> ${formatDate(art.date)}</div>
                 <h3>${art.title}</h3>
                 <p>${stripHtml(art.content).substring(0, 100)}...</p>
-                <a href="article.html?id=${art.id}" class="btn-read">
+                <a href="${BlogState.rootPath}article.html?id=${art.id}" class="btn-read">
                     اقرأ المزيد <i class="fas fa-arrow-left"></i>
                 </a>
             </div>
         </article>
     `).join('');
-
-    El.grid.innerHTML = html;
 }
 
 function renderFullArticle(data) {
-    const titleEl = document.getElementById('article-title');
-    const catEl = document.getElementById('article-category');
-    const dateEl = document.getElementById('article-date')?.querySelector('span');
-    const imgEl = document.getElementById('article-image');
-    const contentEl = document.getElementById('article-content');
     const pageTitle = document.getElementById('page-title');
-
     if (pageTitle) pageTitle.textContent = `${data.title} | مدونة سهل المعرفة`;
-    if (titleEl) titleEl.textContent = data.title;
-    if (catEl) catEl.textContent = data.category;
-    if (dateEl) dateEl.textContent = formatDate(data.date);
-    if (imgEl) {
-        imgEl.src = data.image;
-        imgEl.alt = data.title;
+    
+    if (document.getElementById('article-title')) document.getElementById('article-title').textContent = data.title;
+    if (document.getElementById('article-category')) document.getElementById('article-category').textContent = data.category;
+    if (document.getElementById('article-date')?.querySelector('span')) {
+        document.getElementById('article-date').querySelector('span').textContent = formatDate(data.date);
     }
-    if (contentEl) contentEl.innerHTML = data.content;
+    
+    const img = document.getElementById('article-image');
+    if (img) {
+        img.src = data.image;
+        img.alt = data.title;
+    }
+    
+    if (document.getElementById('article-content')) document.getElementById('article-content').innerHTML = data.content;
 
     if (El.articleView) El.articleView.style.display = 'block';
     if (El.notFound) El.notFound.style.display = 'none';
@@ -231,13 +221,9 @@ function renderFullArticle(data) {
 function formatDate(dateStr) {
     try {
         return new Date(dateStr).toLocaleDateString('ar-EG', {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric'
+            year: 'numeric', month: 'long', day: 'numeric'
         });
-    } catch (e) {
-        return dateStr;
-    }
+    } catch (e) { return dateStr; }
 }
 
 function stripHtml(html) {
@@ -250,9 +236,14 @@ function showArticleError() {
     if (El.notFound) El.notFound.style.display = 'block';
 }
 
-// 9. Event Listeners
+function showGenericError(msg) {
+    if (El.grid) {
+        El.grid.innerHTML = `<div style="grid-column: 1/-1; color: red; text-align: center; padding: 20px;">${msg}</div>`;
+    }
+}
+
+// 9. Lifecycle
 document.addEventListener('DOMContentLoaded', init);
-// Safeguard for already loaded DOM
 if (document.readyState === 'complete' || document.readyState === 'interactive') {
     init();
 }
