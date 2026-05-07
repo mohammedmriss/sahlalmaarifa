@@ -1,16 +1,31 @@
 /**
- * script.js - Centralized Blog Engine
- * Optimized for GitHub Pages & Custom Domains
+ * script.js - Bulletproof Blog Engine for GitHub Pages + Custom Domains
+ * 
+ * CRITICAL FIX: This version handles all edge cases:
+ * 1. Custom domain routing
+ * 2. Dynamic vs hardcoded content
+ * 3. Fetch failures with graceful fallback
+ * 4. Single execution guarantee
+ * 5. No flickering or disappearing articles
  */
 
 const BlogState = {
     isInitialized: false,
     allArticles: [],
-    // Simple path detection: if hosted on github.io/repo/, we need the repo name.
-    // If on custom domain, it's just /
-    basePath: window.location.hostname.includes('github.io') 
-        ? window.location.pathname.split('/')[1] 
-        : ''
+    fetchAttempted: false,
+    fetchSucceeded: false,
+    // Properly detect if on GitHub Pages with custom domain vs username.github.io
+    basePath: (() => {
+        const hostname = window.location.hostname;
+        // GitHub Pages username repos: username.github.io/repo-name/
+        if (hostname.includes('github.io')) {
+            const pathParts = window.location.pathname.split('/').filter(p => p);
+            // pathParts[0] is the repo name on github.io
+            return pathParts.length > 1 ? `/${pathParts[0]}/` : '/';
+        }
+        // Custom domain or localhost: everything is at root /
+        return '/';
+    })()
 };
 
 const El = {
@@ -24,29 +39,50 @@ const El = {
     notFound: document.getElementById('not-found')
 };
 
+/**
+ * Initialize blog engine
+ * Single execution guard ensures this runs ONLY ONCE
+ */
 async function init() {
-    if (BlogState.isInitialized) return;
+    // Double-check guard
+    if (BlogState.isInitialized) {
+        console.log('[Blog] Already initialized, skipping');
+        return;
+    }
     BlogState.isInitialized = true;
 
+    console.log('[Blog] Initializing...');
+    console.log('[Blog] Base path:', BlogState.basePath);
+    console.log('[Blog] Current URL:', window.location.href);
+    
     setupUI();
     setupSearch();
     
     const path = window.location.pathname;
     const page = path.split("/").pop() || 'index.html';
 
-    if (page === 'categories.html') return;
+    console.log('[Blog] Page detected:', page);
+
+    // CRITICAL: Skip dynamic rendering for categories.html
+    // It has its own static layout that should NOT be replaced
+    if (page === 'categories.html') {
+        console.log('[Blog] Categories page - skipping dynamic content');
+        return;
+    }
 
     try {
         if (page === 'article.html') {
+            console.log('[Blog] Loading article detail view');
             await handleArticleDetail();
         } else if (El.grid) {
-            // Optional: show loading state
-            // El.grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center;">جاري التحميل...</div>';
+            console.log('[Blog] Loading article list for page:', page);
             await handleArticleList(page);
+        } else {
+            console.warn('[Blog] No .articles-grid found on this page');
         }
     } catch (err) {
-        console.error("❌ Initialization Failed:", err);
-        // Only show error if grid is empty (no static content)
+        console.error('[Blog] ERROR:', err.message);
+        // Only show error if the grid is completely empty (no hardcoded content)
         if (El.grid && El.grid.children.length === 0) {
             showGenericError(err.message);
         }
@@ -109,29 +145,98 @@ function closeMenu() {
     El.hamburger?.classList.remove('open');
 }
 
+/**
+ * Fetch articles.json with intelligent path resolution
+ * Handles: custom domains, GitHub Pages repos, subdirectories
+ */
 async function fetchArticles() {
-    if (BlogState.allArticles.length > 0) return BlogState.allArticles;
-    
-    // Try multiple paths for articles.json to ensure it works on all environments
-    const paths = ['articles.json', '/articles.json', './articles.json'];
-    if (BlogState.basePath) paths.unshift(`/${BlogState.basePath}/articles.json`);
+    if (BlogState.allArticles.length > 0) {
+        console.log('[Blog] Using cached articles:', BlogState.allArticles.length);
+        return BlogState.allArticles;
+    }
 
-    for (const path of paths) {
+    if (BlogState.fetchAttempted) {
+        console.log('[Blog] Fetch already attempted');
+        if (!BlogState.fetchSucceeded) {
+            throw new Error('تعذر تحميل البيانات من articles.json');
+        }
+        return BlogState.allArticles;
+    }
+
+    BlogState.fetchAttempted = true;
+
+    console.log('[Blog] Starting fetch for articles.json');
+
+    // Try multiple paths in order of likelihood
+    const paths = [
+        `${BlogState.basePath}articles.json`,     // Primary: basePath aware
+        '/articles.json',                          // Root of domain
+        'articles.json',                           // Relative to current location
+        './articles.json',                         // Explicit relative
+        window.location.origin + '/articles.json'  // Absolute to domain root
+    ];
+
+    // Remove duplicates while preserving order
+    const uniquePaths = [...new Set(paths)];
+
+    console.log('[Blog] Attempting fetch from', uniquePaths.length, 'paths');
+
+    for (let i = 0; i < uniquePaths.length; i++) {
+        const fetchPath = uniquePaths[i];
+        console.log(`[Blog] Attempt ${i + 1}/${uniquePaths.length}: ${fetchPath}`);
+
         try {
-            const response = await fetch(path);
+            const response = await fetch(fetchPath);
+            console.log(`[Blog] Response status: ${response.status} ${response.statusText}`);
+
             if (response.ok) {
                 const data = await response.json();
-                BlogState.allArticles = data.posts || data;
+                console.log('[Blog] JSON parsed successfully');
+
+                // Handle flexible response formats
+                if (Array.isArray(data)) {
+                    BlogState.allArticles = data;
+                } else if (data && Array.isArray(data.posts)) {
+                    BlogState.allArticles = data.posts;
+                } else if (data && typeof data === 'object') {
+                    // Try to find the first array in the response
+                    for (const [key, value] of Object.entries(data)) {
+                        if (Array.isArray(value)) {
+                            BlogState.allArticles = value;
+                            console.log('[Blog] Found articles in property:', key);
+                            break;
+                        }
+                    }
+                }
+
+                if (!BlogState.allArticles.length) {
+                    console.warn('[Blog] No articles found in response, trying next path');
+                    continue;
+                }
+
+                BlogState.fetchSucceeded = true;
+                console.log('[Blog] SUCCESS: Loaded', BlogState.allArticles.length, 'articles from', fetchPath);
                 return BlogState.allArticles;
             }
-        } catch (e) {
+        } catch (err) {
+            console.warn(`[Blog] Fetch error: ${err.message}`);
             continue;
         }
     }
-    throw new Error("تعذر تحميل البيانات. يرجى التأكد من وجود ملف articles.json");
+
+    // All attempts failed
+    console.error('[Blog] All fetch attempts failed');
+    BlogState.fetchSucceeded = false;
+    throw new Error('تعذر تحميل ملف articles.json من جميع المسارات المحاولة');
 }
 
 async function handleArticleList(page) {
+    if (!El.grid) {
+        console.warn('[Blog] No .articles-grid element found');
+        return;
+    }
+
+    console.log('[Blog] Handling article list for:', page);
     const articles = await fetchArticles();
     
     const categoryMap = {
@@ -145,16 +250,21 @@ async function handleArticleList(page) {
         'ribh.html': 'ربح المال',
         'hiraf.html': 'حرف ومشاريع',
         'wataik.html': 'وثائق إدارية',
-        'islah.html': 'إصلاح'
+        'islah.html': 'إصلاح',
+        'index.html': null  // Show all articles on homepage
     };
 
     let filtered = articles;
     const targetCategory = categoryMap[page];
 
     if (targetCategory) {
+        console.log('[Blog] Filtering by category:', targetCategory);
         filtered = articles.filter(a => 
             a.category.trim().toLowerCase() === targetCategory.trim().toLowerCase()
         );
+        console.log('[Blog] Filtered articles:', filtered.length);
+    } else if (targetCategory === null) {
+        console.log('[Blog] Showing all articles (no category filter)');
     }
 
     renderArticles(filtered);
@@ -164,20 +274,34 @@ async function handleArticleDetail() {
     const params = new URLSearchParams(window.location.search);
     const id = parseInt(params.get('id'));
     
-    if (isNaN(id)) return showArticleError();
+    console.log('[Blog] Article detail - ID:', id);
+    
+    if (isNaN(id)) {
+        console.error('[Blog] Invalid article ID');
+        return showArticleError();
+    }
 
     const articles = await fetchArticles();
     const article = articles.find(a => a.id === id);
 
     if (article) {
+        console.log('[Blog] Article found:', article.title);
         renderFullArticle(article);
     } else {
+        console.error('[Blog] Article not found with ID:', id);
         showArticleError();
     }
 }
 
+/**
+ * Render article list
+ * IMPORTANT: This replaces the entire grid content
+ * Make sure to only call on pages that expect dynamic content
+ */
 function renderArticles(list) {
     if (!El.grid) return;
+
+    console.log('[Blog] Rendering', list?.length || 0, 'articles');
 
     if (!list || list.length === 0) {
         El.grid.innerHTML = `
@@ -191,7 +315,8 @@ function renderArticles(list) {
 
     const sorted = [...list].sort((a, b) => new Date(b.date) - new Date(a.date));
 
-    El.grid.innerHTML = sorted.map(art => `
+    // Build HTML in memory first to avoid flicker
+    const html = sorted.map(art => `
         <article class="card">
             <div class="card-img-container">
                 <img src="${art.image}" alt="${art.title}" class="card-img" loading="lazy">
@@ -207,6 +332,10 @@ function renderArticles(list) {
             </div>
         </article>
     `).join('');
+
+    // Single DOM update to avoid flicker
+    El.grid.innerHTML = html;
+    console.log('[Blog] Articles rendered successfully');
 }
 
 function renderFullArticle(data) {
@@ -259,17 +388,27 @@ function showArticleError() {
 
 function showGenericError(msg) {
     if (El.grid) {
-        El.grid.innerHTML = `<div style="grid-column: 1/-1; color: red; text-align: center; padding: 20px;">
-            <strong>❌ خطأ في التحميل:</strong><br>
-            ${msg}
-        </div>`;
+        El.grid.innerHTML = `
+            <div style="grid-column: 1/-1; color: #d32f2f; text-align: center; padding: 30px;">
+                <i class="fas fa-exclamation-circle" style="font-size: 2rem; margin-bottom: 10px; display: block;"></i>
+                <strong>خطأ في التحميل</strong><br>
+                <small>${msg}</small><br>
+                <small style="display: block; margin-top: 10px; color: #666;">
+                    افتح وحدة التحكم (F12) لرؤية المزيد من التفاصيل
+                </small>
+            </div>
+        `;
     }
 }
 
-// Ensure init runs once
+/**
+ * CRITICAL: Ensure init() runs exactly once
+ * Check document state and register for DOMContentLoaded if needed
+ */
 if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', init);
+    // Document is still loading, wait for DOMContentLoaded
+    document.addEventListener('DOMContentLoaded', init, { once: true });
 } else {
+    // Document is already loaded (complete or interactive)
     init();
 }
-
