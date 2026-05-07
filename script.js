@@ -1,18 +1,52 @@
 /**
  * script.js - Centralized Blog Engine
  * Optimized for GitHub Pages & Custom Domains
- * Bulletproof version with anti-flicker protection
+ * Bulletproof version with anti-flicker protection & dynamic path detection
  */
 
-// 1. Global State & Robust Path Detection
+// 1. Global State & Robust Dynamic Path Detection
 const BlogState = {
     isInitialized: false,
     allArticles: [],
-    // Robustly find the root directory where script.js and articles.json live
-    rootPath: window.location.origin + '/',  // Always use origin for GitHub Pages
     renderedContent: '',  // Store rendered HTML to prevent flicker
-    mutationObserver: null  // For protection against external clearing
+    mutationObserver: null,  // For protection against external clearing
+    // Dynamically detect the root path
+    rootPath: (function() {
+        console.log("🔍 Detecting root path...");
+        
+        // Strategy 1: Use document.currentScript if available
+        const script = document.currentScript;
+        if (script && script.src) {
+            console.log("✅ Strategy 1: Found document.currentScript at:", script.src);
+            const scriptPath = script.src;
+            const lastSlash = scriptPath.lastIndexOf('/');
+            if (lastSlash !== -1) {
+                const detectedPath = scriptPath.substring(0, lastSlash + 1);
+                console.log("✅ Extracted root path from script:", detectedPath);
+                return detectedPath;
+            }
+        }
+        
+        // Strategy 2: Use current page's directory
+        console.log("ℹ️ Strategy 1 failed, trying Strategy 2: Current page directory");
+        const pathname = window.location.pathname;
+        const lastSlash = pathname.lastIndexOf('/');
+        if (lastSlash !== -1) {
+            const currentDir = pathname.substring(0, lastSlash + 1);
+            console.log("✅ Extracted from current page pathname:", currentDir);
+            return currentDir;
+        }
+        
+        // Strategy 3: Use window.location.origin
+        console.log("ℹ️ Strategy 2 failed, trying Strategy 3: window.location.origin");
+        const fallback = window.location.origin + '/';
+        console.log("⚠️ Using fallback:", fallback);
+        return fallback;
+    })(),
+    attemptedUrls: []  // Track all attempted URLs for debugging
 };
+
+console.log("📂 Final Root Path Configured:", BlogState.rootPath);
 
 // Global execution guard
 if (window.blogEngineInitialized) {
@@ -40,7 +74,8 @@ async function init() {
     BlogState.isInitialized = true;
 
     console.log("🚀 Blog Engine Initializing...");
-    console.log("📂 Root Path Detected:", BlogState.rootPath);
+    console.log("📂 Root Path:", BlogState.rootPath);
+    console.log("🌐 Current URL:", window.location.href);
     
     setupUI();
     
@@ -60,6 +95,7 @@ async function init() {
         console.log("✅ Initialization complete");
     } catch (err) {
         console.error("❌ Initialization Failed:", err);
+        console.error("📋 Attempted URLs:", BlogState.attemptedUrls);
         showGenericError(err.message);
     }
 }
@@ -104,33 +140,100 @@ function closeMenu() {
     El.hamburger?.classList.remove('open');
 }
 
-// 4. Data Loading Logic
+// 4. Intelligent Data Loading with Fallback Mechanism
 async function fetchArticles() {
     if (BlogState.allArticles.length > 0) {
         console.log("📋 Using cached articles:", BlogState.allArticles.length, "articles");
         return BlogState.allArticles;
     }
     
-    const fetchUrl = `${BlogState.rootPath}articles.json`;
-    console.log(`📡 Fetching data from: ${fetchUrl}`);
+    console.log("🔄 Starting fetch for articles.json...");
     
-    try {
-        console.log("🔄 Starting fetch...");
-        const response = await fetch(fetchUrl);
-        console.log("📥 Response received, status:", response.status);
-        
-        if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-        
-        const data = await response.json();
-        console.log("📊 Data parsed successfully, posts found:", data.posts?.length || 0);
-        
-        BlogState.allArticles = data.posts || [];
-        console.log("💾 Articles cached in BlogState");
-        return BlogState.allArticles;
-    } catch (err) {
-        console.error("🚨 Fetch Error:", err);
-        throw new Error("تعذر تحميل البيانات. يرجى التأكد من وجود ملف articles.json في الجذر.");
+    // Generate list of URLs to try (in order of priority)
+    const urlsToTry = [
+        `${BlogState.rootPath}articles.json`,           // Primary: detected root path
+        `${window.location.origin}/articles.json`,      // Fallback 1: domain root
+        `./articles.json`,                               // Fallback 2: relative path
+        `${window.location.origin}${window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/') + 1)}articles.json`  // Fallback 3: current directory
+    ];
+    
+    // Remove duplicates
+    const uniqueUrls = [...new Set(urlsToTry)];
+    
+    console.log("🎯 Attempting to fetch from", uniqueUrls.length, "possible locations:");
+    uniqueUrls.forEach((url, idx) => {
+        console.log(`   ${idx + 1}. ${url}`);
+    });
+    
+    let lastError = null;
+    
+    for (const fetchUrl of uniqueUrls) {
+        try {
+            console.log(`📡 Attempting fetch #${uniqueUrls.indexOf(fetchUrl) + 1}: ${fetchUrl}`);
+            BlogState.attemptedUrls.push(fetchUrl);
+            
+            const response = await fetch(fetchUrl);
+            console.log(`📥 Response status: ${response.status} (${response.statusText}) for ${fetchUrl}`);
+            
+            if (!response.ok) {
+                console.warn(`⚠️ HTTP ${response.status} - Skipping to next URL...`);
+                lastError = new Error(`HTTP ${response.status}: ${response.statusText} at ${fetchUrl}`);
+                continue;
+            }
+            
+            const data = await response.json();
+            console.log("📊 JSON parsed successfully!");
+            console.log("📋 Raw response structure:", {
+                isArray: Array.isArray(data),
+                hasPostsProperty: typeof data === 'object' && 'posts' in data,
+                keys: typeof data === 'object' ? Object.keys(data) : 'N/A'
+            });
+            
+            // Handle flexible data formats
+            let articles = [];
+            
+            if (Array.isArray(data)) {
+                // Data is directly an array of articles
+                console.log("✅ Data is a direct array");
+                articles = data;
+            } else if (data && Array.isArray(data.posts)) {
+                // Data has a 'posts' property with array
+                console.log("✅ Data has 'posts' property as array");
+                articles = data.posts;
+            } else if (data && typeof data === 'object') {
+                // Try to find any array property in the data
+                console.log("⚠️ Data is object but no 'posts' property, searching for array...");
+                for (const [key, value] of Object.entries(data)) {
+                    if (Array.isArray(value)) {
+                        console.log(`✅ Found array property: ${key}`);
+                        articles = value;
+                        break;
+                    }
+                }
+            }
+            
+            if (!Array.isArray(articles) || articles.length === 0) {
+                console.warn("⚠️ No articles found in data, trying next URL...");
+                lastError = new Error("No articles array found in JSON response");
+                continue;
+            }
+            
+            console.log(`✅ Successfully loaded ${articles.length} articles from: ${fetchUrl}`);
+            BlogState.allArticles = articles;
+            console.log("💾 Articles cached in BlogState");
+            return BlogState.allArticles;
+            
+        } catch (err) {
+            console.warn(`🚨 Fetch error for ${fetchUrl}:`, err.message);
+            lastError = err;
+            continue;
+        }
     }
+    
+    // All attempts failed
+    console.error("❌ All fetch attempts failed!");
+    console.error("📋 Attempted URLs:", BlogState.attemptedUrls);
+    throw lastError || new Error("تعذر تحميل البيانات. حاولت جميع المسارات الممكنة ولم تنجح. تحقق من وجود ملف articles.json وتأكد من وصول الملف.");
 }
 
 // 5. List View Handler
@@ -341,7 +444,11 @@ function showArticleError() {
 
 function showGenericError(msg) {
     if (El.grid) {
-        El.grid.innerHTML = `<div style="grid-column: 1/-1; color: red; text-align: center; padding: 20px;">${msg}</div>`;
+        El.grid.innerHTML = `<div style="grid-column: 1/-1; color: red; text-align: center; padding: 20px;">
+            <strong>❌ خطأ في التحميل:</strong><br>
+            ${msg}<br>
+            <small style="display: block; margin-top: 10px; color: #666;">افتح F12 لرؤية تفاصيل الخطأ</small>
+        </div>`;
     }
 }
 
