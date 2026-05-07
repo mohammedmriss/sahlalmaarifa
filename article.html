@@ -116,51 +116,6 @@
 
     <button id="back-to-top" class="back-to-top"><i class="fas fa-chevron-up"></i></button>
 
-    <!-- Data & Loader Script -->
-    <script>
-        document.addEventListener('DOMContentLoaded', async () => {
-            const params = new URLSearchParams(window.location.search);
-            const id = parseInt(params.get('id'));
-            
-            if (isNaN(id)) {
-                showError();
-                return;
-            }
-
-            try {
-                const response = await fetch('articles.json');
-                const data = await response.json();
-                const article = data.posts.find(a => a.id === id);
-                
-                if (article) {
-                    renderArticle(article);
-                } else {
-                    showError();
-                }
-            } catch (err) {
-                console.error('Error fetching article:', err);
-                showError();
-            }
-        });
-
-        function renderArticle(data) {
-            document.getElementById('page-title').textContent = `${data.title} | مدونة سهل المعرفة`;
-            document.getElementById('article-title').textContent = data.title;
-            document.getElementById('article-category').textContent = data.category;
-            document.getElementById('article-date').querySelector('span').textContent = new Date(data.date).toLocaleDateString('ar-EG');
-            document.getElementById('article-image').src = data.image;
-            document.getElementById('article-image').alt = data.title;
-            document.getElementById('article-content').innerHTML = data.content;
-            
-            document.getElementById('article-view').style.display = 'block';
-            document.getElementById('not-found').style.display = 'none';
-        }
-
-        function showError() {
-            document.getElementById('article-view').style.display = 'none';
-            document.getElementById('not-found').style.display = 'block';
-        }
-    </script>
     <script src="script.js"></script>
 </body>
 </html>
