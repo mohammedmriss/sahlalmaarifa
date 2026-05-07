@@ -1,21 +1,7 @@
 /**
- * script.js - Professional Blog Engine
- * Optimized for GitHub Pages + Custom Domains
+ * script.js - Static Blog Engine
+ * Powered by articles-data.js (Synchronous Data Loading)
  */
-
-const BlogState = {
-    isInitialized: false,
-    allArticles: [],
-    isLoading: false,
-    basePath: (() => {
-        const hostname = window.location.hostname;
-        if (hostname.includes('github.io')) {
-            const pathParts = window.location.pathname.split('/').filter(p => p);
-            return pathParts.length > 1 ? `/${pathParts[0]}/` : '/';
-        }
-        return '/';
-    })()
-};
 
 const El = {
     hamburger: document.getElementById('hamburger-btn'),
@@ -28,12 +14,22 @@ const El = {
     notFound: document.getElementById('not-found')
 };
 
+// Global reference for filtering
+let currentFilteredArticles = [];
+
 /**
  * Initialize Engine
  */
-async function init() {
-    if (BlogState.isInitialized) return;
-    BlogState.isInitialized = true;
+function init() {
+    console.log('[Blog] Initializing Engine...');
+    
+    // Safety Check for local data
+    // The variable name in articles-data.js is "allArticlesData"
+    if (typeof allArticlesData === 'undefined') {
+        console.error('[Blog] ERROR: allArticlesData is not defined. Make sure articles-data.js is loaded before script.js');
+        showError('تعذر تحميل بيانات المقالات. يرجى التأكد من وجود ملف articles-data.js');
+        return;
+    }
 
     setupUI();
     setupSearch();
@@ -41,13 +37,13 @@ async function init() {
     const path = window.location.pathname;
     const page = path.split("/").pop() || 'index.html';
 
-    // Don't render dynamic cards on the categories overview page
+    // Skip dynamic grid rendering on categories overview
     if (page === 'categories.html') return;
 
     if (page === 'article.html') {
-        await handleArticleDetail();
+        handleArticleDetail();
     } else if (El.grid) {
-        await handleArticleList(page);
+        handleArticleList(page);
     }
 }
 
@@ -67,6 +63,7 @@ function setupUI() {
         if (El.navMenu?.classList.contains('active')) {
             if (!El.navMenu.contains(e.target) && !El.hamburger.contains(e.target)) {
                 El.navMenu.classList.remove('active');
+                El.hamburger?.classList.remove('open');
             }
         }
     });
@@ -96,128 +93,62 @@ function setupSearch() {
 
     El.search.addEventListener('input', (e) => {
         const term = e.target.value.toLowerCase().trim();
-        if (!BlogState.allArticles.length) return;
-
-        const filtered = BlogState.allArticles.filter(art => 
+        
+        // Filter from the already category-filtered list
+        const results = currentFilteredArticles.filter(art => 
             art.title.toLowerCase().includes(term) || 
-            art.content.toLowerCase().includes(term) ||
             art.category.toLowerCase().includes(term)
         );
 
-        renderArticles(filtered);
+        renderArticles(results);
     });
 }
 
 /**
- * Robust Fetch logic
+ * Page Handlers
  */
-async function fetchArticles() {
-    if (BlogState.allArticles.length > 0) return BlogState.allArticles;
+function handleArticleList(page) {
+    const categoryMap = {
+        'akhbar.html': 'أخبار',
+        'wazaef.html': 'وظائف',
+        'hijra.html': 'الهجرة',
+        'riyada.html': 'رياضة',
+        'tabkh.html': 'الطبخ',
+        'siya9a.html': 'تعليم السياقة',
+        'aflam.html': 'أفلام',
+        'ribh.html': 'ربح المال',
+        'hiraf.html': 'حرف ومشاريع',
+        'wataik.html': 'وثائق إدارية',
+        'islah.html': 'إصلاح'
+    };
 
-    showLoading();
+    const targetCategory = categoryMap[page];
+    
+    // Filter by category if we are on a category page, else show all (index.html)
+    currentFilteredArticles = targetCategory 
+        ? allArticlesData.filter(a => a.category === targetCategory)
+        : allArticlesData;
 
-    const paths = [
-        `${BlogState.basePath}articles.json`,
-        'articles.json',
-        '/articles.json'
-    ];
-
-    for (const path of [...new Set(paths)]) {
-        try {
-            console.log(`[Fetch] Trying: ${path}`);
-            const resp = await fetch(path);
-            if (!resp.ok) continue;
-            
-            const data = await resp.json();
-            const articles = Array.isArray(data) ? data : (data.posts || []);
-            
-            if (articles.length > 0) {
-                BlogState.allArticles = articles;
-                return articles;
-            }
-        } catch (e) {
-            console.warn(`[Fetch] Failed on ${path}:`, e);
-        }
-    }
-
-    throw new Error('Could not load articles.json');
+    console.log(`[Blog] Rendering ${currentFilteredArticles.length} articles for ${page}`);
+    renderArticles(currentFilteredArticles);
 }
 
-/**
- * Loading & Error States
- */
-function showLoading() {
-    if (!El.grid) return;
-    El.grid.innerHTML = Array(6).fill(0).map(() => `
-        <div class="skeleton-card">
-            <div class="skeleton-img"></div>
-            <div class="skeleton-text medium"></div>
-            <div class="skeleton-text long"></div>
-            <div class="skeleton-text short"></div>
-        </div>
-    `).join('');
-}
-
-function showError(msg) {
-    if (!El.grid) return;
-    El.grid.innerHTML = `
-        <div class="error-container">
-            <i class="fas fa-exclamation-triangle"></i>
-            <h3>عذراً، حدث خطأ أثناء تحميل البيانات</h3>
-            <p>${msg}</p>
-            <button class="btn-retry" onclick="location.reload()">إعادة المحاولة</button>
-        </div>
-    `;
-}
-
-/**
- * Handlers
- */
-async function handleArticleList(page) {
-    try {
-        const articles = await fetchArticles();
-        
-        const categoryMap = {
-            'akhbar.html': 'أخبار',
-            'wazaef.html': 'وظائف',
-            'hijra.html': 'الهجرة',
-            'riyada.html': 'رياضة',
-            'tabkh.html': 'الطبخ',
-            'siya9a.html': 'تعليم السياقة',
-            'aflam.html': 'أفلام',
-            'ribh.html': 'ربح المال',
-            'hiraf.html': 'حرف ومشاريع',
-            'wataik.html': 'وثائق إدارية',
-            'islah.html': 'إصلاح'
-        };
-
-        const targetCategory = categoryMap[page];
-        const filtered = targetCategory 
-            ? articles.filter(a => a.category === targetCategory)
-            : articles;
-
-        renderArticles(filtered);
-    } catch (err) {
-        showError(err.message);
-    }
-}
-
-async function handleArticleDetail() {
-    const id = new URLSearchParams(window.location.search).get('id');
+function handleArticleDetail() {
+    const params = new URLSearchParams(window.location.search);
+    const id = params.get('id');
+    
     if (!id) return showArticleNotFound();
 
-    try {
-        const articles = await fetchArticles();
-        const article = articles.find(a => a.id == id);
-        if (article) renderFullArticle(article);
-        else showArticleNotFound();
-    } catch (err) {
+    const article = allArticlesData.find(a => a.id == id);
+    if (article) {
+        renderFullArticle(article);
+    } else {
         showArticleNotFound();
     }
 }
 
 /**
- * Rendering
+ * Rendering Logic
  */
 function renderArticles(list) {
     if (!El.grid) return;
@@ -226,30 +157,32 @@ function renderArticles(list) {
         El.grid.innerHTML = `
             <div class="empty-container">
                 <i class="fas fa-search"></i>
-                <p>لا توجد مقالات في هذا القسم حالياً.</p>
+                <p>لا توجد مقالات تطابق بحثك حالياً.</p>
             </div>
         `;
         return;
     }
 
-    const html = list
-        .sort((a, b) => new Date(b.date) - new Date(a.date))
-        .map(art => `
-            <article class="card">
-                <div class="card-img-container">
-                    <img src="${art.image}" alt="${art.title}" class="card-img" loading="lazy" onerror="this.src='https://via.placeholder.com/800x450?text=No+Image'">
-                    <span class="card-badge">${art.category}</span>
-                </div>
-                <div class="card-body">
-                    <div class="card-date"><i class="far fa-calendar-alt"></i> ${formatDate(art.date)}</div>
-                    <h3>${art.title}</h3>
-                    <p>${stripHtml(art.content).substring(0, 100)}...</p>
-                    <a href="article.html?id=${art.id}" class="btn-read">
-                        اقرأ المزيد <i class="fas fa-arrow-left"></i>
-                    </a>
-                </div>
-            </article>
-        `).join('');
+    // Sort by date descending
+    const sorted = [...list].sort((a, b) => new Date(b.date) - new Date(a.date));
+
+    const html = sorted.map(art => `
+        <article class="card">
+            <div class="card-img-container">
+                <img src="${art.image}" alt="${art.title}" class="card-img" loading="lazy" 
+                     onerror="this.onerror=null;this.src='https://via.placeholder.com/800x450?text=No+Image'">
+                <span class="card-badge">${art.category}</span>
+            </div>
+            <div class="card-body">
+                <div class="card-date"><i class="far fa-calendar-alt"></i> ${formatDate(art.date)}</div>
+                <h3>${art.title}</h3>
+                <p>${stripHtml(art.content).substring(0, 100)}...</p>
+                <a href="article.html?id=${art.id}" class="btn-read">
+                    اقرأ المزيد <i class="fas fa-arrow-left"></i>
+                </a>
+            </div>
+        </article>
+    `).join('');
 
     El.grid.innerHTML = html;
 }
@@ -257,35 +190,43 @@ function renderArticles(list) {
 function renderFullArticle(data) {
     document.title = `${data.title} | مدونة سهل المعرفة`;
     
-    // Fill basic fields
-    const textFields = {
+    // Fill text fields
+    const fields = {
         'article-title': data.title,
         'article-category': data.category,
         'article-content': data.content
     };
 
-    Object.entries(textFields).forEach(([id, val]) => {
+    Object.entries(fields).forEach(([id, val]) => {
         const el = document.getElementById(id);
-        if (!el) return;
-        if (id === 'article-content') el.innerHTML = val;
-        else el.textContent = val;
+        if (el) {
+            if (id === 'article-content') el.innerHTML = val;
+            else el.textContent = val;
+        }
     });
-    
-    // Fill image
-    const imgEl = document.getElementById('article-image');
-    if (imgEl) {
-        imgEl.src = data.image;
-        imgEl.alt = data.title;
+
+    // Fill Image
+    const img = document.getElementById('article-image');
+    if (img) {
+        img.src = data.image;
+        img.alt = data.title;
+        img.onerror = function() {
+            this.src = 'https://via.placeholder.com/1200x600?text=Image+Not+Found';
+        };
     }
 
-    // Fill date span
-    const dateSpan = document.getElementById('article-date')?.querySelector('span');
+    // Fill Date
+    const dateContainer = document.getElementById('article-date');
+    const dateSpan = dateContainer?.querySelector('span');
     if (dateSpan) dateSpan.textContent = formatDate(data.date);
     
     if (El.articleView) El.articleView.style.display = 'block';
     if (El.notFound) El.notFound.style.display = 'none';
 }
 
+/**
+ * Helpers
+ */
 function formatDate(dateStr) {
     try {
         return new Date(dateStr).toLocaleDateString('ar-EG', {
@@ -304,7 +245,19 @@ function showArticleNotFound() {
     if (El.notFound) El.notFound.style.display = 'block';
 }
 
-// Start
+function showError(msg) {
+    if (El.grid) {
+        El.grid.innerHTML = `
+            <div class="error-container">
+                <i class="fas fa-exclamation-triangle"></i>
+                <h3>خطأ في النظام</h3>
+                <p>${msg}</p>
+            </div>
+        `;
+    }
+}
+
+// Execution Start
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);
 } else {
