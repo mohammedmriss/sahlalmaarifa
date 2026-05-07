@@ -23,28 +23,22 @@ let currentFilteredArticles = [];
 function init() {
     console.log('[Blog] Initializing Engine (Local Data Mode)...');
     
-    /**
-     * REQUIREMENT: Fix 'Undefined' Errors
-     * Check if 'articles' constant exists (from articles-data.js)
-     */
-    // We check for 'articles' as per prompt, but also handle 'allArticlesData' as seen in the file
-    const dataArray = (typeof articles !== 'undefined') ? articles : (typeof allArticlesData !== 'undefined' ? allArticlesData : null);
-
-    if (!dataArray) {
-        console.error('Data file missing'); // REQUIRED console error
+    // Check if 'articles' constant exists (from articles-data.js)
+    if (typeof articles === 'undefined') {
+        console.error('Data file missing');
         showError('تعذر تحميل بيانات المقالات. يرجى التأكد من وجود ملف articles-data.js');
         return;
     }
 
     setupUI();
-    setupSearch(dataArray);
+    setupSearch(articles);
     
     const path = window.location.pathname;
     const page = path.split("/").pop() || 'index.html';
 
     // Handle Article Detail Page
     if (page === 'article.html') {
-        handleArticleDetail(dataArray);
+        handleArticleDetail(articles);
         return;
     }
 
@@ -53,7 +47,7 @@ function init() {
 
     // Handle Article List & Filtering
     if (El.grid) {
-        handleArticleList(page, dataArray);
+        handleArticleList(page, articles);
     }
 }
 

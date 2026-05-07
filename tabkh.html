@@ -57,6 +57,12 @@
                 <div class="hero-content">
                     <h1>عالم الطبخ</h1>
                     <p>استمتع بأشهى الوصفات وأسرار المطبخ العربي والعالمي</p>
+                    <div class="search-container">
+                        <div class="search-box">
+                            <i class="fas fa-search search-icon"></i>
+                            <input type="text" id="main-search" placeholder="ابحث في هذا القسم..." autocomplete="off">
+                        </div>
+                    </div>
                 </div>
             </div>
         </section>
@@ -64,89 +70,7 @@
         <!-- Main Display -->
         <main class="container main-content">
             <div class="articles-grid">
-                <!-- Article 1 -->
-                <article class="card">
-                    <div class="card-img-container">
-                        <img src="https://images.unsplash.com/photo-1541518763669-27fef04b14ea?w=600" alt="طجين مغربي" class="card-img" loading="lazy">
-                        <span class="card-badge">الطبخ</span>
-                    </div>
-                    <div class="card-body">
-                        <div class="card-date"><i class="far fa-calendar-alt"></i> 14 مايو 2026</div>
-                        <h3>طريقة تحضير الطجين المغربي الأصيل</h3>
-                        <p>أسرار النكهة المغربية التقليدية وطريقة طهي اللحم مع البرقوق.</p>
-                        <a href="article.html?id=5" class="btn-read">اقرأ المزيد <i class="fas fa-arrow-left"></i></a>
-                    </div>
-                </article>
-
-                <!-- Article 2 -->
-                <article class="card">
-                    <div class="card-img-container">
-                        <img src="https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=600" alt="وصفات صحية" class="card-img" loading="lazy">
-                        <span class="card-badge">الطبخ</span>
-                    </div>
-                    <div class="card-body">
-                        <div class="card-date"><i class="far fa-calendar-alt"></i> 13 مايو 2026</div>
-                        <h3>5 وصفات سريعة لعشاء خفيف وصحي</h3>
-                        <p>أطباق مبتكرة يمكن تحضيرها في أقل من 20 دقيقة وبمكونات بسيطة.</p>
-                        <a href="article.html?id=5" class="btn-read">اقرأ المزيد <i class="fas fa-arrow-left"></i></a>
-                    </div>
-                </article>
-
-                <!-- Article 3 -->
-                <article class="card">
-                    <div class="card-img-container">
-                        <img src="https://images.unsplash.com/photo-1516685018646-527ad9501517?w=600" alt="حلويات شرقية" class="card-img" loading="lazy">
-                        <span class="card-badge">الطبخ</span>
-                    </div>
-                    <div class="card-body">
-                        <div class="card-date"><i class="far fa-calendar-alt"></i> 12 مايو 2026</div>
-                        <h3>فن تحضير الحلويات الشرقية في المنزل</h3>
-                        <p>تعلمي خطوة بخطوة كيفية صنع البقلاوة والكنافة باحترافية عالية.</p>
-                        <a href="article.html?id=5" class="btn-read">اقرأ المزيد <i class="fas fa-arrow-left"></i></a>
-                    </div>
-                </article>
-
-                <!-- Article 4 -->
-                <article class="card">
-                    <div class="card-img-container">
-                        <img src="https://images.unsplash.com/photo-1565553642973-6afe791aee33?w=600" alt="أطباق رمضانية" class="card-img" loading="lazy">
-                        <span class="card-badge">الطبخ</span>
-                    </div>
-                    <div class="card-body">
-                        <div class="card-date"><i class="far fa-calendar-alt"></i> 11 مايو 2026</div>
-                        <h3>أفضل الأطباق الرمضانية المغربية</h3>
-                        <p>قائمة مختارة من الوصفات التي لا تخلو منها المائدة المغربية في رمضان.</p>
-                        <a href="article.html?id=5" class="btn-read">اقرأ المزيد <i class="fas fa-arrow-left"></i></a>
-                    </div>
-                </article>
-
-                <!-- Article 5 -->
-                <article class="card">
-                    <div class="card-img-container">
-                        <img src="https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=600" alt="مشويات" class="card-img" loading="lazy">
-                        <span class="card-badge">الطبخ</span>
-                    </div>
-                    <div class="card-body">
-                        <div class="card-date"><i class="far fa-calendar-alt"></i> 10 مايو 2026</div>
-                        <h3>أسرار تتبيل المشويات على الطريقة التركية</h3>
-                        <p>كيف تحصل على لحم مشوي طري ولذيذ باستخدام مكونات بسيطة من مطبخك.</p>
-                        <a href="article.html?id=5" class="btn-read">اقرأ المزيد <i class="fas fa-arrow-left"></i></a>
-                    </div>
-                </article>
-
-                <!-- Article 6 -->
-                <article class="card">
-                    <div class="card-img-container">
-                        <img src="https://images.unsplash.com/photo-1567620905732-2d1ec7bb7445?w=600" alt="فطور صحي" class="card-img" loading="lazy">
-                        <span class="card-badge">الطبخ</span>
-                    </div>
-                    <div class="card-body">
-                        <div class="card-date"><i class="far fa-calendar-alt"></i> 09 مايو 2026</div>
-                        <h3>أفكار فطور صحي للأطفال قبل المدرسة</h3>
-                        <p>وجبات متكاملة تمنح طفلك الطاقة والتركيز طوال اليوم الدراسي.</p>
-                        <a href="article.html?id=5" class="btn-read">اقرأ المزيد <i class="fas fa-arrow-left"></i></a>
-                    </div>
-                </article>
+                <!-- Dynamic Articles Injected by script.js -->
             </div>
         </main>
     </div>
@@ -189,6 +113,10 @@
         <i class="fas fa-chevron-up"></i>
     </button>
 
+    
+    <script src="articles-data.js"></script>
     <script src="script.js"></script>
 </body>
 </html>
+
+

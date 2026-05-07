@@ -57,6 +57,12 @@
                 <div class="hero-content">
                     <h1>قسم الوظائف</h1>
                     <p>دليلك لأحدث فرص العمل والتوظيف والمباريات</p>
+                    <div class="search-container">
+                        <div class="search-box">
+                            <i class="fas fa-search search-icon"></i>
+                            <input type="text" id="main-search" placeholder="ابحث في هذا القسم..." autocomplete="off">
+                        </div>
+                    </div>
                 </div>
             </div>
         </section>
@@ -64,89 +70,7 @@
         <!-- Main Display -->
         <main class="container main-content">
             <div class="articles-grid">
-                <!-- Article 1 -->
-                <article class="card">
-                    <div class="card-img-container">
-                        <img src="https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=600" alt="مطلوب مهندسي برمجيات" class="card-img" loading="lazy">
-                        <span class="card-badge">وظائف</span>
-                    </div>
-                    <div class="card-body">
-                        <div class="card-date"><i class="far fa-calendar-alt"></i> 11 مايو 2026</div>
-                        <h3>مطلوب مهندسي برمجيات للعمل عن بعد</h3>
-                        <p>شركة تقنية عالمية تبحث عن مطورين في تخصصات Full Stack و AI.</p>
-                        <a href="article.html?id=2" class="btn-read">اقرأ المزيد <i class="fas fa-arrow-left"></i></a>
-                    </div>
-                </article>
-
-                <!-- Article 2 -->
-                <article class="card">
-                    <div class="card-img-container">
-                        <img src="https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?w=600" alt="فرص عمل سياحية" class="card-img" loading="lazy">
-                        <span class="card-badge">وظائف</span>
-                    </div>
-                    <div class="card-body">
-                        <div class="card-date"><i class="far fa-calendar-alt"></i> 10 مايو 2026</div>
-                        <h3>فرص عمل في القطاع السياحي بمدينة مراكش</h3>
-                        <p>الفنادق الكبرى تفتح باب التوظيف للموسم الصيفي في مختلف التخصصات.</p>
-                        <a href="article.html?id=2" class="btn-read">اقرأ المزيد <i class="fas fa-arrow-left"></i></a>
-                    </div>
-                </article>
-
-                <!-- Article 3 -->
-                <article class="card">
-                    <div class="card-img-container">
-                        <img src="https://images.unsplash.com/photo-1589829545856-d10d557cf95f?w=600" alt="مباراة ملحق قضائي" class="card-img" loading="lazy">
-                        <span class="card-badge">وظائف</span>
-                    </div>
-                    <div class="card-body">
-                        <div class="card-date"><i class="far fa-calendar-alt"></i> 09 مايو 2026</div>
-                        <h3>مباراة لتوظيف 500 ملحق قضائي</h3>
-                        <p>وزارة العدل تعلن عن تنظيم مباراة لولوج السلك القضائي لعام 2026.</p>
-                        <a href="article.html?id=2" class="btn-read">اقرأ المزيد <i class="fas fa-arrow-left"></i></a>
-                    </div>
-                </article>
-
-                <!-- Article 4 -->
-                <article class="card">
-                    <div class="card-img-container">
-                        <img src="https://images.unsplash.com/photo-1454165833767-027ff3d631ea?w=600" alt="تدريبات بنكية" class="card-img" loading="lazy">
-                        <span class="card-badge">وظائف</span>
-                    </div>
-                    <div class="card-body">
-                        <div class="card-date"><i class="far fa-calendar-alt"></i> 08 مايو 2026</div>
-                        <h3>تدريبات مهنية مدفوعة الأجر في البنوك</h3>
-                        <p>فرصة للطلبة حديثي التخرج لاكتساب خبرة ميدانية في القطاع المصرفي.</p>
-                        <a href="article.html?id=2" class="btn-read">اقرأ المزيد <i class="fas fa-arrow-left"></i></a>
-                    </div>
-                </article>
-
-                <!-- Article 5 -->
-                <article class="card">
-                    <div class="card-img-container">
-                        <img src="https://images.unsplash.com/photo-1521737711867-e3b97375f902?w=600" alt="خدمة العملاء" class="card-img" loading="lazy">
-                        <span class="card-badge">وظائف</span>
-                    </div>
-                    <div class="card-body">
-                        <div class="card-date"><i class="far fa-calendar-alt"></i> 07 مايو 2026</div>
-                        <h3>توظيف فوري لموظفي خدمة العملاء باللغة الفرنسية</h3>
-                        <p>كبرى مراكز النداء بالدار البيضاء تعلن عن حملة توظيف واسعة برواتب محفزة.</p>
-                        <a href="article.html?id=2" class="btn-read">اقرأ المزيد <i class="fas fa-arrow-left"></i></a>
-                    </div>
-                </article>
-
-                <!-- Article 6 -->
-                <article class="card">
-                    <div class="card-img-container">
-                        <img src="https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?w=600" alt="مهن التمريض" class="card-img" loading="lazy">
-                        <span class="card-badge">وظائف</span>
-                    </div>
-                    <div class="card-body">
-                        <div class="card-date"><i class="far fa-calendar-alt"></i> 06 مايو 2026</div>
-                        <h3>مباريات ولوج معاهد التمريض وتقنيات الصحة</h3>
-                        <p>كل ما تحتاج معرفته عن شروط الولوج ومواعيد التسجيل والاختبارات.</p>
-                        <a href="article.html?id=2" class="btn-read">اقرأ المزيد <i class="fas fa-arrow-left"></i></a>
-                    </div>
-                </article>
+                <!-- Dynamic Articles Injected by script.js -->
             </div>
         </main>
     </div>
@@ -189,6 +113,10 @@
         <i class="fas fa-chevron-up"></i>
     </button>
 
+    
+    <script src="articles-data.js"></script>
     <script src="script.js"></script>
 </body>
 </html>
+
+

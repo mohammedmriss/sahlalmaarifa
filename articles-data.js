@@ -2,7 +2,7 @@
  * articles-data.js - قاعدة البيانات الموحدة للمقالات
  */
 
-const allArticlesData = [
+const articles = [
     {
         id: 1,
         category: "أخبار",
