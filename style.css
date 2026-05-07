@@ -585,32 +585,62 @@ img {
     .hero-content h1 { font-size: 2.5rem; }
 }
 
-@media (max-width: 768px) {
-    .main-header { height: 70px; }
-    .nav-links {
-        position: fixed;
-        top: 70px;
-        right: -100%;
-        width: 100%;
-        height: calc(100vh - 70px);
-        background: white;
-        flex-direction: column;
-        align-items: center;
-        padding-top: 50px;
-        transition: 0.4s ease;
-        box-shadow: var(--shadow);
-    }
-    
-    .nav-links.active {
-        right: 0;
-    }
-    
-    .hamburger { display: flex; }
-    
-    .hero-content h1 { font-size: 2rem; }
-    .hero-section { padding: 50px 0; }
-    
-    .footer-grid { grid-template-columns: 1fr; }
-    .detail-content { padding: 30px 20px; }
-    .detail-header h2 { font-size: 1.8rem; }
+/* Skeleton Loading Animation */
+@keyframes skeleton-loading {
+    0% { background-color: #f1f5f9; }
+    100% { background-color: #e2e8f0; }
 }
+
+.skeleton-card {
+    height: 350px;
+    background: white;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    overflow: hidden;
+}
+
+.skeleton-img {
+    height: 220px;
+    animation: skeleton-loading 1s linear infinite alternate;
+}
+
+.skeleton-text {
+    height: 20px;
+    margin: 15px;
+    border-radius: 4px;
+    animation: skeleton-loading 1s linear infinite alternate;
+}
+
+.skeleton-text.short { width: 40%; }
+.skeleton-text.medium { width: 70%; }
+.skeleton-text.long { width: 90%; }
+
+/* Error & Empty States */
+.error-container, .empty-container {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 60px 20px;
+    background: white;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+}
+
+.error-container i, .empty-container i {
+    font-size: 3rem;
+    color: #cbd5e1;
+    margin-bottom: 20px;
+}
+
+.btn-retry {
+    margin-top: 20px;
+    padding: 10px 25px;
+    background: var(--primary);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.btn-retry:hover { background: var(--primary-dark); }
+
