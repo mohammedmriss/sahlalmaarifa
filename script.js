@@ -1,6 +1,6 @@
 /**
- * script.js - Static Blog Engine
- * Powered by articles-data.js (Synchronous Data Loading)
+ * script.js - Final Static Blog Engine
+ * Data Source: Local 'articles' array from articles-data.js
  */
 
 const El = {
@@ -21,29 +21,39 @@ let currentFilteredArticles = [];
  * Initialize Engine
  */
 function init() {
-    console.log('[Blog] Initializing Engine...');
+    console.log('[Blog] Initializing Engine (Local Data Mode)...');
     
-    // Safety Check for local data
-    // The variable name in articles-data.js is "allArticlesData"
-    if (typeof allArticlesData === 'undefined') {
-        console.error('[Blog] ERROR: allArticlesData is not defined. Make sure articles-data.js is loaded before script.js');
+    /**
+     * REQUIREMENT: Fix 'Undefined' Errors
+     * Check if 'articles' constant exists (from articles-data.js)
+     */
+    // We check for 'articles' as per prompt, but also handle 'allArticlesData' as seen in the file
+    const dataArray = (typeof articles !== 'undefined') ? articles : (typeof allArticlesData !== 'undefined' ? allArticlesData : null);
+
+    if (!dataArray) {
+        console.error('Data file missing'); // REQUIRED console error
         showError('تعذر تحميل بيانات المقالات. يرجى التأكد من وجود ملف articles-data.js');
         return;
     }
 
     setupUI();
-    setupSearch();
+    setupSearch(dataArray);
     
     const path = window.location.pathname;
     const page = path.split("/").pop() || 'index.html';
 
-    // Skip dynamic grid rendering on categories overview
+    // Handle Article Detail Page
+    if (page === 'article.html') {
+        handleArticleDetail(dataArray);
+        return;
+    }
+
+    // Skip dynamic grid rendering on categories overview page
     if (page === 'categories.html') return;
 
-    if (page === 'article.html') {
-        handleArticleDetail();
-    } else if (El.grid) {
-        handleArticleList(page);
+    // Handle Article List & Filtering
+    if (El.grid) {
+        handleArticleList(page, dataArray);
     }
 }
 
@@ -88,13 +98,13 @@ function setupUI() {
 /**
  * Search Logic
  */
-function setupSearch() {
+function setupSearch(data) {
     if (!El.search || !El.grid) return;
 
     El.search.addEventListener('input', (e) => {
         const term = e.target.value.toLowerCase().trim();
         
-        // Filter from the already category-filtered list
+        // Search through the articles currently allowed on this page
         const results = currentFilteredArticles.filter(art => 
             art.title.toLowerCase().includes(term) || 
             art.category.toLowerCase().includes(term)
@@ -107,7 +117,7 @@ function setupSearch() {
 /**
  * Page Handlers
  */
-function handleArticleList(page) {
+function handleArticleList(page, data) {
     const categoryMap = {
         'akhbar.html': 'أخبار',
         'wazaef.html': 'وظائف',
@@ -124,22 +134,25 @@ function handleArticleList(page) {
 
     const targetCategory = categoryMap[page];
     
-    // Filter by category if we are on a category page, else show all (index.html)
+    /**
+     * REQUIREMENT: Page Logic
+     * index.html (or targetCategory null) -> Render All
+     * category.html -> Filter by Category
+     */
     currentFilteredArticles = targetCategory 
-        ? allArticlesData.filter(a => a.category === targetCategory)
-        : allArticlesData;
+        ? data.filter(a => a.category.trim() === targetCategory)
+        : data;
 
-    console.log(`[Blog] Rendering ${currentFilteredArticles.length} articles for ${page}`);
     renderArticles(currentFilteredArticles);
 }
 
-function handleArticleDetail() {
+function handleArticleDetail(data) {
     const params = new URLSearchParams(window.location.search);
     const id = params.get('id');
     
     if (!id) return showArticleNotFound();
 
-    const article = allArticlesData.find(a => a.id == id);
+    const article = data.find(a => a.id == id);
     if (article) {
         renderFullArticle(article);
     } else {
@@ -169,6 +182,7 @@ function renderArticles(list) {
     const html = sorted.map(art => `
         <article class="card">
             <div class="card-img-container">
+                <!-- REQUIREMENT: Image Fallback (onerror) -->
                 <img src="${art.image}" alt="${art.title}" class="card-img" loading="lazy" 
                      onerror="this.onerror=null;this.src='https://via.placeholder.com/800x450?text=No+Image'">
                 <span class="card-badge">${art.category}</span>
@@ -190,7 +204,6 @@ function renderArticles(list) {
 function renderFullArticle(data) {
     document.title = `${data.title} | مدونة سهل المعرفة`;
     
-    // Fill text fields
     const fields = {
         'article-title': data.title,
         'article-category': data.category,
@@ -205,17 +218,16 @@ function renderFullArticle(data) {
         }
     });
 
-    // Fill Image
     const img = document.getElementById('article-image');
     if (img) {
         img.src = data.image;
         img.alt = data.title;
+        // REQUIREMENT: Image Fallback (onerror)
         img.onerror = function() {
             this.src = 'https://via.placeholder.com/1200x600?text=Image+Not+Found';
         };
     }
 
-    // Fill Date
     const dateContainer = document.getElementById('article-date');
     const dateSpan = dateContainer?.querySelector('span');
     if (dateSpan) dateSpan.textContent = formatDate(data.date);
@@ -257,7 +269,7 @@ function showError(msg) {
     }
 }
 
-// Execution Start
+// Execution Start (Immediate/Synchronous)
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);
 } else {
