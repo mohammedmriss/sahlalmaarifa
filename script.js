@@ -55,19 +55,40 @@ function init() {
  * UI & Navigation
  */
 function setupUI() {
+    // Create overlay if it doesn't exist
+    let overlay = document.querySelector('.nav-overlay');
+    if (!overlay) {
+        overlay = document.createElement('div');
+        overlay.className = 'nav-overlay';
+        document.body.appendChild(overlay);
+    }
+
     if (El.hamburger && El.navMenu) {
         El.hamburger.onclick = (e) => {
             e.stopPropagation();
-            El.navMenu.classList.toggle('active');
+            const isActive = El.navMenu.classList.toggle('active');
             El.hamburger.classList.toggle('open');
+            overlay.classList.toggle('active');
+            
+            // Prevent body scroll when menu is open
+            document.body.style.overflow = isActive ? 'hidden' : '';
         };
     }
+
+    overlay.onclick = () => {
+        El.navMenu?.classList.remove('active');
+        El.hamburger?.classList.remove('open');
+        overlay.classList.remove('active');
+        document.body.style.overflow = '';
+    };
 
     document.addEventListener('click', (e) => {
         if (El.navMenu?.classList.contains('active')) {
             if (!El.navMenu.contains(e.target) && !El.hamburger.contains(e.target)) {
                 El.navMenu.classList.remove('active');
                 El.hamburger?.classList.remove('open');
+                overlay.classList.remove('active');
+                document.body.style.overflow = '';
             }
         }
     });

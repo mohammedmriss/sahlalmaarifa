@@ -40,28 +40,28 @@
     <main class="container main-content">
         <div id="article-view" class="detail-view" style="display: none;">
             <header class="detail-header">
-                <div id="article-category" class="card-badge" style="display: inline-block; margin-bottom: 15px;"></div>
-                <h1 id="article-title" style="margin-bottom: 15px;"></h1>
+                <div id="article-category" class="card-badge"></div>
+                <h1 id="article-title"></h1>
                 <div class="card-date" id="article-date">
                     <i class="far fa-calendar-alt"></i> <span></span>
                 </div>
             </header>
 
-            <div class="detail-img" style="margin: 30px 0; border-radius: 15px; overflow: hidden;">
-                <img id="article-image" src="" alt="" style="width: 100%; height: auto; display: block;">
+            <div class="detail-img-wrapper">
+                <img id="article-image" src="" alt="" class="detail-img">
             </div>
 
-            <div class="detail-content" style="background: white; padding: 40px; border-radius: 15px; line-height: 1.8;">
-                <div id="article-content" class="article-body" style="font-size: 1.2rem; color: var(--text-main);">
+            <div class="detail-content">
+                <div id="article-content" class="article-body">
                     <!-- Content will be injected here -->
                 </div>
                 
-                <div class="share-box" style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #eee;">
-                    <h4 style="margin-bottom: 15px;">شارك المقال:</h4>
-                    <div class="social-icons" style="display: flex; gap: 15px;">
-                        <a href="#" style="font-size: 1.5rem; color: #1877f2;"><i class="fab fa-facebook"></i></a>
-                        <a href="#" style="font-size: 1.5rem; color: #1da1f2;"><i class="fab fa-twitter"></i></a>
-                        <a href="#" style="font-size: 1.5rem; color: #25d366;"><i class="fab fa-whatsapp"></i></a>
+                <div class="share-box">
+                    <h4>شارك المقال:</h4>
+                    <div class="social-icons">
+                        <a href="#" class="facebook"><i class="fab fa-facebook"></i></a>
+                        <a href="#" class="twitter"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="whatsapp"><i class="fab fa-whatsapp"></i></a>
                     </div>
                 </div>
             </div>
