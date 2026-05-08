@@ -309,6 +309,11 @@
         let currentSha = null;
 
         // --- Auth System ---
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log("CMS Initializing...");
+            checkAuth();
+        });
+
         const loginForm = document.getElementById('login-form');
         loginForm.addEventListener('submit', (e) => {
             e.preventDefault();
@@ -343,9 +348,20 @@
             document.getElementById('main-dashboard').classList.remove('hidden');
             
             initEditor();
+            
+            Swal.fire({
+                title: 'جاري تحميل البيانات...',
+                allowOutsideClick: false,
+                didOpen: () => Swal.showLoading()
+            });
+
             await fetchArticles();
+            
             populateCategoryDropdowns();
             renderDashboard();
+            renderArticlesList();
+            
+            Swal.close();
             showSection('overview');
         }
 
@@ -372,7 +388,10 @@
         // --- GitHub API Engine ---
         async function githubAPI(path, method = 'GET', body = null) {
             const token = sessionStorage.getItem('cms_token');
-            const url = `https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${path}`;
+            // Cache Buster: Append timestamp to the path to ensure we always hit the latest version
+            const separator = path.includes('?') ? '&' : '?';
+            const cacheBuster = `${separator}v=${Date.now()}`;
+            const url = `https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${path}${method === 'GET' ? cacheBuster : ''}`;
             
             const options = {
                 method,
@@ -398,13 +417,17 @@
                 const data = await githubAPI(CONFIG.articlesFile);
                 currentSha = data.sha;
                 const content = atob(data.content);
-                // Handle potential UTF-8 encoding issues with atob
                 const decoded = decodeURIComponent(escape(content));
                 articlesData = JSON.parse(decoded);
+                console.log("Articles Data Loaded Successfully:", articlesData);
                 return articlesData;
             } catch (err) {
-                console.error(err);
-                Swal.fire('خطأ', 'تعذر جلب البيانات من GitHub: ' + err.message, 'error');
+                console.error("Fetch Error:", err);
+                articlesData = [];
+                // If it's a 404, the file just doesn't exist yet, which is fine
+                if (!err.message.includes('Not Found')) {
+                    Swal.fire('خطأ', 'تعذر جلب البيانات من GitHub: ' + err.message, 'error');
+                }
                 return [];
             }
         }
@@ -441,7 +464,9 @@
                             content: base64,
                             branch: CONFIG.branch
                         });
-                        resolve(res.content.download_url);
+                        // Use GitHub Raw URL for guaranteed rendering on frontend
+                        const rawUrl = `https://raw.githubusercontent.com/${CONFIG.owner}/${CONFIG.repo}/${CONFIG.branch}/${path}`;
+                        resolve(rawUrl);
                     } catch (err) {
                         reject(err);
                     }
@@ -478,8 +503,15 @@
             const cats = [...new Set(articlesData.map(a => a.category))];
             document.getElementById('stat-categories').innerText = cats.length;
 
-            const recent = articlesData.slice(-5).reverse();
             const list = document.getElementById('recent-articles-list');
+            
+            // Fix: Show "No articles" message if data is empty
+            if (articlesData.length === 0) {
+                list.innerHTML = `<tr><td colspan="4" class="px-6 py-12 text-center text-slate-400 font-bold">لا توجد مقالات لعرضها حالياً.</td></tr>`;
+                return;
+            }
+
+            const recent = articlesData.slice(-5).reverse();
             list.innerHTML = recent.map(art => `
                 <tr class="border-b border-slate-50 hover:bg-slate-50 transition">
                     <td class="px-6 py-4 font-bold text-slate-700">${art.title.substring(0, 40)}...</td>
@@ -492,11 +524,18 @@
 
         function renderArticlesList() {
             const list = document.getElementById('full-articles-list');
+            
+            // Fix: Show empty state for main articles list
+            if (articlesData.length === 0) {
+                list.innerHTML = `<tr><td colspan="5" class="px-6 py-12 text-center text-slate-400 font-bold">لا توجد مقالات في قاعدة البيانات.</td></tr>`;
+                return;
+            }
+
             const sorted = [...articlesData].reverse();
             list.innerHTML = sorted.map(art => `
                 <tr class="border-b border-slate-50 hover:bg-slate-50 transition">
                     <td class="px-6 py-4">
-                        <img src="${art.image}" class="w-16 h-10 object-cover rounded-lg shadow-sm">
+                        <img src="${art.image}" class="w-16 h-10 object-cover rounded-lg shadow-sm" onerror="this.src='https://via.placeholder.com/80x50?text=No+Image'">
                     </td>
                     <td class="px-6 py-4">
                         <div class="font-bold text-slate-800">${art.title}</div>
@@ -517,10 +556,10 @@
         function populateCategoryDropdowns() {
             const cats = ["أخبار", "وظائف", "الهجرة", "رياضة", "الطبخ", "تعليم السياقة", "أفلام", "ربح المال", "حرف ومشاريع", "وثائق إدارية", "إصلاح"];
             const select = document.getElementById('art-category');
-            select.innerHTML = cats.map(c => `<option value="${c}">${c}</option>`).join('');
+            if (select) select.innerHTML = cats.map(c => `<option value="${c}">${c}</option>`).join('');
             
             const filter = document.getElementById('filter-category');
-            filter.innerHTML = '<option value="">كل التصنيفات</option>' + cats.map(c => `<option value="${c}">${c}</option>`).join('');
+            if (filter) filter.innerHTML = '<option value="">كل التصنيفات</option>' + cats.map(c => `<option value="${c}">${c}</option>`).join('');
         }
 
         // --- Editor Logic ---
@@ -529,7 +568,7 @@
             document.getElementById('art-title').value = '';
             document.getElementById('art-image').value = '';
             document.getElementById('image-preview').innerHTML = '<i class="fas fa-image text-4xl text-slate-300"></i>';
-            quill.setContents([]);
+            if (quill) quill.setContents([]);
             
             document.getElementById('editor-title').innerText = 'إضافة مقال جديد';
             document.getElementById('btn-text').innerText = 'حفظ ونشر المقال';
@@ -543,11 +582,10 @@
         document.getElementById('image-upload').addEventListener('change', async (e) => {
             if (e.target.files[0]) {
                 try {
-                    Swal.showLoading();
+                    Swal.fire({ title: 'جاري الرفع...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
                     const url = await uploadImage(e.target.files[0]);
                     document.getElementById('art-image').value = url;
                     updateImagePreview(url);
-                    Swal.close();
                     Swal.fire('نجاح', 'تم رفع الصورة بنجاح!', 'success');
                 } catch (err) {
                     Swal.fire('خطأ', 'فشل رفع الصورة.', 'error');
@@ -558,8 +596,9 @@
         document.getElementById('art-image').addEventListener('input', (e) => updateImagePreview(e.target.value));
 
         function updateImagePreview(url) {
-            if (url) {
-                document.getElementById('image-preview').innerHTML = `<img src="${url}" class="w-full h-full object-cover">`;
+            const preview = document.getElementById('image-preview');
+            if (url && preview) {
+                preview.innerHTML = `<img src="${url}" class="w-full h-full object-cover">`;
             }
         }
 
@@ -567,14 +606,12 @@
         document.getElementById('article-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             const id = document.getElementById('edit-id').value;
-            const article = {
-                id: id ? parseInt(id) : Date.now(),
-                title: document.getElementById('art-title').value,
-                category: document.getElementById('art-category').value,
-                image: document.getElementById('art-image').value || 'https://via.placeholder.com/800x450',
-                date: new Date().toISOString(),
-                content: quill.root.innerHTML
-            };
+            
+            // Fix: Ensure content is extracted as pure STRING from Quill
+            const articleBody = quill ? quill.root.innerHTML : "";
+            const articleTitle = document.getElementById('art-title').value;
+            const articleCategory = document.getElementById('art-category').value;
+            const articleImage = document.getElementById('art-image').value;
 
             Swal.fire({
                 title: 'جاري الحفظ...',
@@ -586,12 +623,35 @@
             try {
                 let newArticles = [];
                 if (id) {
-                    newArticles = articlesData.map(a => a.id == id ? article : a);
+                    const existingIndex = articlesData.findIndex(a => a.id == id);
+                    const existingArticle = articlesData[existingIndex];
+                    
+                    // Fix: Use Spread Operator to preserve metadata (like views) and prevent data loss
+                    const updatedArticle = {
+                        ...existingArticle,
+                        title: articleTitle,
+                        category: articleCategory,
+                        image: articleImage || 'https://via.placeholder.com/800x450',
+                        content: articleBody, // Forced as String
+                        date: new Date().toISOString()
+                    };
+                    newArticles = [...articlesData];
+                    newArticles[existingIndex] = updatedArticle;
                 } else {
-                    newArticles = [...articlesData, article];
+                    const newArticle = {
+                        id: Date.now(),
+                        title: articleTitle,
+                        category: articleCategory,
+                        image: articleImage || 'https://via.placeholder.com/800x450',
+                        content: articleBody,
+                        date: new Date().toISOString(),
+                        views: 0
+                    };
+                    newArticles = [...articlesData, newArticle];
                 }
 
-                await pushArticles(newArticles, id ? `Update article: ${article.title}` : `Add new article: ${article.title}`);
+                console.log("Final Pushed Data Structure:", newArticles);
+                await pushArticles(newArticles, id ? `Update article: ${articleTitle}` : `Add new article: ${articleTitle}`);
                 articlesData = newArticles;
                 
                 Swal.fire('تم بنجاح!', 'تم حفظ المقال ونشره على الموقع.', 'success');
@@ -599,6 +659,7 @@
                 renderArticlesList();
                 renderDashboard();
             } catch (err) {
+                console.error("Save Error:", err);
                 Swal.fire('خطأ في الحفظ', err.message, 'error');
             }
         });
