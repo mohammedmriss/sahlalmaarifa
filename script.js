@@ -20,25 +20,28 @@ let currentFilteredArticles = [];
 /**
  * Initialize Engine
  */
-function init() {
-    console.log('[Blog] Initializing Engine (Local Data Mode)...');
+async function init() {
+    console.log('[Blog] Initializing Engine (JSON Data Mode)...');
     
-    // Check if 'articles' constant exists (from articles-data.js)
-    if (typeof articles === 'undefined') {
-        console.error('Data file missing');
-        showError('تعذر تحميل بيانات المقالات. يرجى التأكد من وجود ملف articles-data.js');
+    try {
+        const response = await fetch('articles.json');
+        if (!response.ok) throw new Error('Failed to fetch articles.json');
+        window.articles = await response.json();
+    } catch (err) {
+        console.error('Data file missing or invalid:', err);
+        showError('تعذر تحميل بيانات المقالات. يرجى التأكد من وجود ملف articles.json');
         return;
     }
 
     setupUI();
-    setupSearch(articles);
+    setupSearch(window.articles);
     
     const path = window.location.pathname;
     const page = path.split("/").pop() || 'index.html';
 
     // Handle Article Detail Page
     if (page === 'article.html') {
-        handleArticleDetail(articles);
+        handleArticleDetail(window.articles);
         return;
     }
 
@@ -47,7 +50,7 @@ function init() {
 
     // Handle Article List & Filtering
     if (El.grid) {
-        handleArticleList(page, articles);
+        handleArticleList(page, window.articles);
     }
 }
 

@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sahl Al Maarifa | CMS Dashboard</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts: Tajawal -->
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800&display=swap" rel="stylesheet">
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- Quill Rich Text Editor -->
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+    <script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
+
+    <style>
+        body { font-family: 'Tajawal', sans-serif; background-color: #f8fafc; }
+        .sidebar { background-color: #0f172a; transition: all 0.3s ease; }
+        .nav-link { transition: all 0.2s; border-right: 4px solid transparent; }
+        .nav-link.active { background-color: #1e293b; border-right-color: #3b82f6; color: white; }
+        .card-shadow { box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05); }
+        .ql-editor { text-align: right; min-height: 300px; font-size: 1.1rem; }
+        [dir="rtl"] .ql-snow .ql-picker:not(.ql-color-picker):not(.ql-background-picker) .ql-picker-label { padding-left: 18px; padding-right: 8px; }
+    </style>
+</head>
+<body class="overflow-x-hidden">
+
+    <!-- Login Overlay -->
+    <div id="login-screen" class="fixed inset-0 z-[2000] flex items-center justify-center bg-slate-900">
+        <div class="w-full max-w-md p-8 bg-white rounded-2xl shadow-2xl mx-4">
+            <div class="text-center mb-8">
+                <h1 class="text-3xl font-extrabold text-slate-800">Sahl Al Maarifa</h1>
+                <p class="text-slate-500 mt-2">لوحة تحكم إدارة المحتوى</p>
+            </div>
+            <form id="login-form" class="space-y-6">
+                <div>
+                    <label class="block text-sm font-bold text-slate-700 mb-2">البريد الإلكتروني</label>
+                    <input type="email" id="login-email" required class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 transition">
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-slate-700 mb-2">كلمة المرور</label>
+                    <input type="password" id="login-pass" required class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 transition">
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-slate-700 mb-2">GitHub Personal Token</label>
+                    <input type="password" id="github-token" required placeholder="ghp_..." class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 transition">
+                    <p class="text-[10px] text-slate-400 mt-1">* سيتم تخزين التوكن في ذاكرة الجلسة فقط.</p>
+                </div>
+                <button type="submit" class="w-full py-4 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow-lg transition transform hover:-translate-y-1">
+                    دخول إلى النظام
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Main Dashboard Layout (Hidden by default) -->
+    <div id="main-dashboard" class="hidden flex min-h-screen">
+        
+        <!-- Sidebar -->
+        <aside class="sidebar w-64 fixed h-full flex flex-col text-slate-400 z-50">
+            <div class="p-6">
+                <div class="text-white text-xl font-bold flex items-center gap-3">
+                    <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">S</div>
+                    <span>CMS Admin</span>
+                </div>
+            </div>
+            
+            <nav class="flex-1 mt-6">
+                <a href="#" onclick="showSection('overview')" class="nav-link flex items-center gap-4 px-6 py-4 hover:text-white" id="link-overview">
+                    <i class="fas fa-chart-pie"></i>
+                    <span>نظرة عامة</span>
+                </a>
+                <a href="#" onclick="showSection('articles')" class="nav-link flex items-center gap-4 px-6 py-4 hover:text-white" id="link-articles">
+                    <i class="fas fa-file-alt"></i>
+                    <span>المقالات</span>
+                </a>
+                <a href="#" onclick="showSection('categories')" class="nav-link flex items-center gap-4 px-6 py-4 hover:text-white" id="link-categories">
+                    <i class="fas fa-tags"></i>
+                    <span>التصنيفات</span>
+                </a>
+                <a href="#" onclick="showSection('media')" class="nav-link flex items-center gap-4 px-6 py-4 hover:text-white" id="link-media">
+                    <i class="fas fa-images"></i>
+                    <span>الوسائط</span>
+                </a>
+            </nav>
+            
+            <div class="p-6 border-t border-slate-800">
+                <button onclick="logout()" class="flex items-center gap-4 text-rose-400 hover:text-rose-300">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>تسجيل الخروج</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content Wrapper -->
+        <main class="flex-1 mr-64 bg-slate-50 min-h-screen p-8">
+            
+            <!-- Header -->
+            <header class="flex justify-between items-center mb-10">
+                <div>
+                    <h2 id="section-title" class="text-3xl font-extrabold text-slate-800">لوحة التحكم</h2>
+                    <p id="section-desc" class="text-slate-500 mt-1">إحصائيات وأداء الموقع بشكل عام.</p>
+                </div>
+                <div class="flex items-center gap-4">
+                    <button id="btn-create-article" onclick="openArticleEditor()" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-bold shadow-md transition">
+                        + إضافة مقال جديد
+                    </button>
+                    <div class="w-12 h-12 bg-white rounded-xl flex items-center justify-center shadow-sm border border-slate-200">
+                        <i class="fas fa-bell text-slate-400"></i>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Section: Overview (Metrics Cards) -->
+            <section id="section-overview" class="block space-y-8">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div class="bg-white p-6 rounded-2xl border border-slate-100 card-shadow">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="w-12 h-12 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center text-xl">
+                                <i class="fas fa-newspaper"></i>
+                            </div>
+                            <span class="text-emerald-500 font-bold text-sm bg-emerald-50 px-2 py-1 rounded-lg">+12%</span>
+                        </div>
+                        <h3 class="text-slate-500 font-medium">إجمالي المقالات</h3>
+                        <p id="stat-articles" class="text-3xl font-extrabold text-slate-800 mt-1">0</p>
+                    </div>
+                    
+                    <div class="bg-white p-6 rounded-2xl border border-slate-100 card-shadow">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="w-12 h-12 bg-purple-50 text-purple-600 rounded-xl flex items-center justify-center text-xl">
+                                <i class="fas fa-eye"></i>
+                            </div>
+                            <span class="text-emerald-500 font-bold text-sm bg-emerald-50 px-2 py-1 rounded-lg">+5.2k</span>
+                        </div>
+                        <h3 class="text-slate-500 font-medium">المشاهدات</h3>
+                        <p id="stat-views" class="text-3xl font-extrabold text-slate-800 mt-1">45.2k</p>
+                    </div>
+                    
+                    <div class="bg-white p-6 rounded-2xl border border-slate-100 card-shadow">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="w-12 h-12 bg-amber-50 text-amber-600 rounded-xl flex items-center justify-center text-xl">
+                                <i class="fas fa-folder-open"></i>
+                            </div>
+                            <span class="text-slate-400 font-bold text-sm">--</span>
+                        </div>
+                        <h3 class="text-slate-500 font-medium">التصنيفات</h3>
+                        <p id="stat-categories" class="text-3xl font-extrabold text-slate-800 mt-1">0</p>
+                    </div>
+                    
+                    <div class="bg-white p-6 rounded-2xl border border-slate-100 card-shadow">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="w-12 h-12 bg-rose-50 text-rose-600 rounded-xl flex items-center justify-center text-xl">
+                                <i class="fas fa-users"></i>
+                            </div>
+                            <span class="text-emerald-500 font-bold text-sm bg-emerald-50 px-2 py-1 rounded-lg">+24</span>
+                        </div>
+                        <h3 class="text-slate-500 font-medium">المتابعين</h3>
+                        <p id="stat-followers" class="text-3xl font-extrabold text-slate-800 mt-1">1,240</p>
+                    </div>
+                </div>
+
+                <!-- Recent Activity / Table Summary -->
+                <div class="bg-white rounded-2xl border border-slate-100 card-shadow overflow-hidden">
+                    <div class="p-6 border-b border-slate-50 flex justify-between items-center">
+                        <h3 class="font-bold text-slate-800 text-lg">آخر المقالات المضافة</h3>
+                        <button onclick="showSection('articles')" class="text-blue-600 font-bold text-sm hover:underline">عرض الكل</button>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-right">
+                            <thead class="bg-slate-50 text-slate-500 text-sm">
+                                <tr>
+                                    <th class="px-6 py-4 font-bold">المقال</th>
+                                    <th class="px-6 py-4 font-bold">التصنيف</th>
+                                    <th class="px-6 py-4 font-bold">التاريخ</th>
+                                    <th class="px-6 py-4 font-bold">الحالة</th>
+                                </tr>
+                            </thead>
+                            <tbody id="recent-articles-list">
+                                <!-- JS Injection -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section: Articles List -->
+            <section id="section-articles" class="hidden space-y-6">
+                <div class="bg-white rounded-2xl border border-slate-100 card-shadow p-6 flex flex-wrap gap-4 items-center justify-between">
+                    <div class="flex-1 min-w-[300px]">
+                        <div class="relative">
+                            <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                            <input type="text" id="article-search" placeholder="ابحث في المقالات..." class="w-full pl-12 pr-4 py-3 rounded-xl border border-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+                    </div>
+                    <div class="flex gap-4">
+                        <select id="filter-category" class="px-4 py-3 rounded-xl border border-slate-100 focus:outline-none bg-white">
+                            <option value="">كل التصنيفات</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-2xl border border-slate-100 card-shadow overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-right">
+                            <thead class="bg-slate-50 text-slate-500 text-sm">
+                                <tr>
+                                    <th class="px-6 py-4 font-bold">الصورة</th>
+                                    <th class="px-6 py-4 font-bold">العنوان</th>
+                                    <th class="px-6 py-4 font-bold">التصنيف</th>
+                                    <th class="px-6 py-4 font-bold">التاريخ</th>
+                                    <th class="px-6 py-4 font-bold">الإجراءات</th>
+                                </tr>
+                            </thead>
+                            <tbody id="full-articles-list">
+                                <!-- JS Injection -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section: Editor (Modal-like) -->
+            <div id="editor-overlay" class="hidden fixed inset-0 z-[100] bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4">
+                <div class="bg-white w-full max-w-5xl h-[90vh] rounded-2xl shadow-2xl flex flex-col overflow-hidden">
+                    <div class="p-6 border-b flex justify-between items-center bg-slate-50">
+                        <h3 id="editor-title" class="text-xl font-extrabold text-slate-800">إضافة مقال جديد</h3>
+                        <button onclick="closeEditor()" class="text-slate-400 hover:text-rose-500 transition">
+                            <i class="fas fa-times text-2xl"></i>
+                        </button>
+                    </div>
+                    
+                    <form id="article-form" class="flex-1 overflow-y-auto p-8 space-y-6">
+                        <input type="hidden" id="edit-id">
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block text-sm font-bold text-slate-700 mb-2">عنوان المقال</label>
+                                    <input type="text" id="art-title" required placeholder="أدخل عنواناً جذاباً..." class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 transition outline-none">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-bold text-slate-700 mb-2">التصنيف</label>
+                                    <select id="art-category" required class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 transition outline-none bg-white">
+                                        <!-- JS Injection -->
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-bold text-slate-700 mb-2">صورة المقال الرئيسية</label>
+                                    <div class="flex gap-2">
+                                        <input type="text" id="art-image" placeholder="URL الصورة أو ارفع واحدة..." class="flex-1 px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 transition outline-none">
+                                        <label class="bg-slate-100 hover:bg-slate-200 px-4 py-3 rounded-xl cursor-pointer transition">
+                                            <i class="fas fa-upload text-slate-600"></i>
+                                            <input type="file" id="image-upload" class="hidden" accept="image/*">
+                                        </label>
+                                    </div>
+                                    <p class="text-[10px] text-slate-400 mt-1">* سيتم رفع الصور إلى مجلد /uploads</p>
+                                </div>
+                            </div>
+                            
+                            <div class="space-y-4">
+                                <label class="block text-sm font-bold text-slate-700 mb-2">معاينة الصورة</label>
+                                <div id="image-preview" class="w-full aspect-video bg-slate-100 rounded-2xl flex items-center justify-center overflow-hidden border border-dashed border-slate-300">
+                                    <i class="fas fa-image text-4xl text-slate-300"></i>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-bold text-slate-700 mb-2">محتوى المقال</label>
+                            <div id="editor-container" class="rounded-xl border border-slate-200 bg-white"></div>
+                        </div>
+
+                        <div class="flex justify-end gap-4 pt-6">
+                            <button type="button" onclick="closeEditor()" class="px-8 py-3 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold rounded-xl transition">إلغاء</button>
+                            <button type="submit" id="btn-save-article" class="px-10 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow-lg transition transform hover:scale-105">
+                                <span id="btn-text">حفظ ونشر المقال</span>
+                                <i class="fas fa-paper-plane mr-2"></i>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- JavaScript CMS Engine -->
+    <script>
+        // --- Constants & Config ---
+        const CONFIG = {
+            owner: 'mohammedmriss',
+            repo: 'sahlalmaarifa',
+            articlesFile: 'articles.json',
+            uploadsFolder: 'uploads',
+            branch: 'main'
+        };
+
+        const CREDENTIALS = {
+            email: 'mrissmohammed20@gmail.com',
+            pass: 'Mohammed@2026'
+        };
+
+        let articlesData = [];
+        let quill = null;
+        let currentSha = null;
+
+        // --- Auth System ---
+        const loginForm = document.getElementById('login-form');
+        loginForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const email = document.getElementById('login-email').value;
+            const pass = document.getElementById('login-pass').value;
+            const token = document.getElementById('github-token').value;
+
+            if (email === CREDENTIALS.email && pass === CREDENTIALS.pass && token.startsWith('ghp_')) {
+                sessionStorage.setItem('cms_token', token);
+                sessionStorage.setItem('cms_auth', 'true');
+                Swal.fire('نجاح', 'تم تسجيل الدخول بنجاح!', 'success');
+                initDashboard();
+            } else {
+                Swal.fire('خطأ', 'بيانات الاعتماد غير صحيحة أو التوكن غير صالح.', 'error');
+            }
+        });
+
+        function checkAuth() {
+            if (sessionStorage.getItem('cms_auth') === 'true') {
+                initDashboard();
+            }
+        }
+
+        function logout() {
+            sessionStorage.clear();
+            location.reload();
+        }
+
+        // --- Dashboard Initialization ---
+        async function initDashboard() {
+            document.getElementById('login-screen').classList.add('hidden');
+            document.getElementById('main-dashboard').classList.remove('hidden');
+            
+            initEditor();
+            await fetchArticles();
+            populateCategoryDropdowns();
+            renderDashboard();
+            showSection('overview');
+        }
+
+        function initEditor() {
+            if (!quill) {
+                quill = new Quill('#editor-container', {
+                    theme: 'snow',
+                    modules: {
+                        toolbar: [
+                            [{ 'header': [1, 2, 3, false] }],
+                            ['bold', 'italic', 'underline', 'strike'],
+                            [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                            [{ 'direction': 'rtl' }],
+                            ['link', 'image', 'video'],
+                            ['clean']
+                        ]
+                    }
+                });
+                quill.format('direction', 'rtl');
+                quill.format('align', 'right');
+            }
+        }
+
+        // --- GitHub API Engine ---
+        async function githubAPI(path, method = 'GET', body = null) {
+            const token = sessionStorage.getItem('cms_token');
+            const url = `https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${path}`;
+            
+            const options = {
+                method,
+                headers: {
+                    'Authorization': `token ${token}`,
+                    'Accept': 'application/vnd.github.v3+json',
+                    'Content-Type': 'application/json'
+                }
+            };
+
+            if (body) options.body = JSON.stringify(body);
+
+            const response = await fetch(url, options);
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.message || 'GitHub API Error');
+            }
+            return await response.json();
+        }
+
+        async function fetchArticles() {
+            try {
+                const data = await githubAPI(CONFIG.articlesFile);
+                currentSha = data.sha;
+                const content = atob(data.content);
+                // Handle potential UTF-8 encoding issues with atob
+                const decoded = decodeURIComponent(escape(content));
+                articlesData = JSON.parse(decoded);
+                return articlesData;
+            } catch (err) {
+                console.error(err);
+                Swal.fire('خطأ', 'تعذر جلب البيانات من GitHub: ' + err.message, 'error');
+                return [];
+            }
+        }
+
+        async function pushArticles(newArticles, message = 'Update articles via CMS') {
+            const jsonString = JSON.stringify(newArticles, null, 2);
+            // Proper UTF-8 to Base64
+            const encoded = btoa(unescape(encodeURIComponent(jsonString)));
+            
+            // CRITICAL: Always get fresh SHA before update
+            const freshData = await githubAPI(CONFIG.articlesFile);
+            
+            const body = {
+                message,
+                content: encoded,
+                sha: freshData.sha,
+                branch: CONFIG.branch
+            };
+
+            return await githubAPI(CONFIG.articlesFile, 'PUT', body);
+        }
+
+        async function uploadImage(file) {
+            const reader = new FileReader();
+            return new Promise((resolve, reject) => {
+                reader.onload = async () => {
+                    const base64 = reader.result.split(',')[1];
+                    const fileName = `${Date.now()}_${file.name.replace(/\s+/g, '_')}`;
+                    const path = `${CONFIG.uploadsFolder}/${fileName}`;
+                    
+                    try {
+                        const res = await githubAPI(path, 'PUT', {
+                            message: `Upload image: ${fileName}`,
+                            content: base64,
+                            branch: CONFIG.branch
+                        });
+                        resolve(res.content.download_url);
+                    } catch (err) {
+                        reject(err);
+                    }
+                };
+                reader.onerror = reject;
+                reader.readAsDataURL(file);
+            });
+        }
+
+        // --- UI Rendering ---
+        function showSection(id) {
+            const sections = ['overview', 'articles', 'categories', 'media'];
+            sections.forEach(s => {
+                document.getElementById(`section-${s}`).classList.toggle('hidden', s !== id);
+                document.getElementById(`link-${s}`).classList.toggle('active', s === id);
+            });
+
+            // Update Header
+            const meta = {
+                overview: { title: 'لوحة التحكم', desc: 'إحصائيات وأداء الموقع بشكل عام.' },
+                articles: { title: 'إدارة المقالات', desc: 'استعراض، تعديل، وحذف المقالات المنشورة.' },
+                categories: { title: 'التصنيفات', desc: 'إدارة وتخصيص أقسام المدونة.' },
+                media: { title: 'مكتبة الوسائط', desc: 'الصور والملفات المرفوعة.' }
+            };
+            document.getElementById('section-title').innerText = meta[id].title;
+            document.getElementById('section-desc').innerText = meta[id].desc;
+
+            if (id === 'articles') renderArticlesList();
+            if (id === 'overview') renderDashboard();
+        }
+
+        function renderDashboard() {
+            document.getElementById('stat-articles').innerText = articlesData.length;
+            const cats = [...new Set(articlesData.map(a => a.category))];
+            document.getElementById('stat-categories').innerText = cats.length;
+
+            const recent = articlesData.slice(-5).reverse();
+            const list = document.getElementById('recent-articles-list');
+            list.innerHTML = recent.map(art => `
+                <tr class="border-b border-slate-50 hover:bg-slate-50 transition">
+                    <td class="px-6 py-4 font-bold text-slate-700">${art.title.substring(0, 40)}...</td>
+                    <td class="px-6 py-4"><span class="px-3 py-1 bg-blue-50 text-blue-600 rounded-full text-xs font-bold">${art.category}</span></td>
+                    <td class="px-6 py-4 text-slate-500 text-sm">${new Date(art.date).toLocaleDateString('ar-EG')}</td>
+                    <td class="px-6 py-4"><span class="flex items-center gap-2 text-emerald-500 text-xs font-bold"><i class="fas fa-circle text-[8px]"></i> منشور</span></td>
+                </tr>
+            `).join('');
+        }
+
+        function renderArticlesList() {
+            const list = document.getElementById('full-articles-list');
+            const sorted = [...articlesData].reverse();
+            list.innerHTML = sorted.map(art => `
+                <tr class="border-b border-slate-50 hover:bg-slate-50 transition">
+                    <td class="px-6 py-4">
+                        <img src="${art.image}" class="w-16 h-10 object-cover rounded-lg shadow-sm">
+                    </td>
+                    <td class="px-6 py-4">
+                        <div class="font-bold text-slate-800">${art.title}</div>
+                        <div class="text-[10px] text-slate-400 mt-1">ID: ${art.id}</div>
+                    </td>
+                    <td class="px-6 py-4"><span class="px-3 py-1 bg-slate-100 text-slate-600 rounded-full text-xs font-bold">${art.category}</span></td>
+                    <td class="px-6 py-4 text-slate-500 text-sm">${new Date(art.date).toLocaleDateString('ar-EG')}</td>
+                    <td class="px-6 py-4">
+                        <div class="flex gap-2">
+                            <button onclick="editArticle(${art.id})" class="w-8 h-8 bg-amber-50 text-amber-600 rounded-lg hover:bg-amber-100 transition"><i class="fas fa-edit"></i></button>
+                            <button onclick="deleteArticle(${art.id})" class="w-8 h-8 bg-rose-50 text-rose-600 rounded-lg hover:bg-rose-100 transition"><i class="fas fa-trash"></i></button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function populateCategoryDropdowns() {
+            const cats = ["أخبار", "وظائف", "الهجرة", "رياضة", "الطبخ", "تعليم السياقة", "أفلام", "ربح المال", "حرف ومشاريع", "وثائق إدارية", "إصلاح"];
+            const select = document.getElementById('art-category');
+            select.innerHTML = cats.map(c => `<option value="${c}">${c}</option>`).join('');
+            
+            const filter = document.getElementById('filter-category');
+            filter.innerHTML = '<option value="">كل التصنيفات</option>' + cats.map(c => `<option value="${c}">${c}</option>`).join('');
+        }
+
+        // --- Editor Logic ---
+        function openArticleEditor() {
+            document.getElementById('edit-id').value = '';
+            document.getElementById('art-title').value = '';
+            document.getElementById('art-image').value = '';
+            document.getElementById('image-preview').innerHTML = '<i class="fas fa-image text-4xl text-slate-300"></i>';
+            quill.setContents([]);
+            
+            document.getElementById('editor-title').innerText = 'إضافة مقال جديد';
+            document.getElementById('btn-text').innerText = 'حفظ ونشر المقال';
+            document.getElementById('editor-overlay').classList.remove('hidden');
+        }
+
+        function closeEditor() {
+            document.getElementById('editor-overlay').classList.add('hidden');
+        }
+
+        document.getElementById('image-upload').addEventListener('change', async (e) => {
+            if (e.target.files[0]) {
+                try {
+                    Swal.showLoading();
+                    const url = await uploadImage(e.target.files[0]);
+                    document.getElementById('art-image').value = url;
+                    updateImagePreview(url);
+                    Swal.close();
+                    Swal.fire('نجاح', 'تم رفع الصورة بنجاح!', 'success');
+                } catch (err) {
+                    Swal.fire('خطأ', 'فشل رفع الصورة.', 'error');
+                }
+            }
+        });
+
+        document.getElementById('art-image').addEventListener('input', (e) => updateImagePreview(e.target.value));
+
+        function updateImagePreview(url) {
+            if (url) {
+                document.getElementById('image-preview').innerHTML = `<img src="${url}" class="w-full h-full object-cover">`;
+            }
+        }
+
+        // --- CRUD Implementation ---
+        document.getElementById('article-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const id = document.getElementById('edit-id').value;
+            const article = {
+                id: id ? parseInt(id) : Date.now(),
+                title: document.getElementById('art-title').value,
+                category: document.getElementById('art-category').value,
+                image: document.getElementById('art-image').value || 'https://via.placeholder.com/800x450',
+                date: new Date().toISOString(),
+                content: quill.root.innerHTML
+            };
+
+            Swal.fire({
+                title: 'جاري الحفظ...',
+                text: 'يتم الآن تحديث مستودع GitHub',
+                allowOutsideClick: false,
+                didOpen: () => Swal.showLoading()
+            });
+
+            try {
+                let newArticles = [];
+                if (id) {
+                    newArticles = articlesData.map(a => a.id == id ? article : a);
+                } else {
+                    newArticles = [...articlesData, article];
+                }
+
+                await pushArticles(newArticles, id ? `Update article: ${article.title}` : `Add new article: ${article.title}`);
+                articlesData = newArticles;
+                
+                Swal.fire('تم بنجاح!', 'تم حفظ المقال ونشره على الموقع.', 'success');
+                closeEditor();
+                renderArticlesList();
+                renderDashboard();
+            } catch (err) {
+                Swal.fire('خطأ في الحفظ', err.message, 'error');
+            }
+        });
+
+        async function editArticle(id) {
+            const art = articlesData.find(a => a.id == id);
+            if (!art) return;
+
+            document.getElementById('edit-id').value = art.id;
+            document.getElementById('art-title').value = art.title;
+            document.getElementById('art-category').value = art.category;
+            document.getElementById('art-image').value = art.image;
+            updateImagePreview(art.image);
+            quill.root.innerHTML = art.content;
+
+            document.getElementById('editor-title').innerText = 'تعديل مقال';
+            document.getElementById('btn-text').innerText = 'تحديث المقال';
+            document.getElementById('editor-overlay').classList.remove('hidden');
+        }
+
+        async function deleteArticle(id) {
+            const res = await Swal.fire({
+                title: 'هل أنت متأكد؟',
+                text: "لن تتمكن من التراجع عن هذا!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#e11d48',
+                cancelButtonColor: '#64748b',
+                confirmButtonText: 'نعم، احذف!',
+                cancelButtonText: 'إلغاء'
+            });
+
+            if (res.isConfirmed) {
+                Swal.fire({ didOpen: () => Swal.showLoading() });
+                try {
+                    const newArticles = articlesData.filter(a => a.id != id);
+                    await pushArticles(newArticles, `Delete article with ID: ${id}`);
+                    articlesData = newArticles;
+                    renderArticlesList();
+                    renderDashboard();
+                    Swal.fire('تم الحذف!', 'تمت إزالة المقال من الموقع.', 'success');
+                } catch (err) {
+                    Swal.fire('خطأ', err.message, 'error');
+                }
+            }
+        }
+
+        // --- Init ---
+        checkAuth();
+
+    </script>
+</body>
+</html>
