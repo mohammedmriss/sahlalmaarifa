@@ -420,6 +420,7 @@
         // --- State Variables ---
         let articlesData = [];
         let currentSha = null;
+        let gh_token = '';
 
         // --- Editor Logic ---
         let editorRich, editorCode, editorModeToggle, artContentHidden;
@@ -526,37 +527,68 @@
 
         // --- Auth System ---
         document.addEventListener('DOMContentLoaded', () => {
-            console.log("[Auth] CMS Page Loaded.");
+            console.log('[Auth] CMS Page Loaded.');
             checkAuth();
+            loadAdsForNonAdmin();
         });
 
         const loginForm = document.getElementById('login-form');
         if (loginForm) {
-            loginForm.addEventListener('submit', (e) => {
-                e.preventDefault();
-                const email = document.getElementById('login-email').value.trim();
-                const pass = document.getElementById('login-pass').value;
-                const token = document.getElementById('github-token').value.trim();
-                if (email.toLowerCase() === CREDENTIALS.email.toLowerCase() && pass === CREDENTIALS.pass) {
-                    if (token.startsWith('ghp_')) {
-                        sessionStorage.setItem('cms_token', token);
-                        sessionStorage.setItem('cms_auth', 'true');
-                        Swal.fire({ icon: 'success', title: 'نجاح', text: 'تم تسجيل الدخول بنجاح!', timer: 1500, showConfirmButton: false }).then(() => {
-                            initDashboard();
-                        });
-                    } else {
-                        Swal.fire('خطأ', 'يرجى إدخال GitHub Token صحيح.', 'error');
-                    }
-                } else {
-                    Swal.fire('خطأ', 'بيانات الاعتماد غير صحيحة.', 'error');
-                }
+            loginForm.addEventListener('submit', handleLogin);
+        }
+
+        function handleLogin(event) {
+            event.preventDefault();
+            const email = document.getElementById('login-email').value.trim();
+            const pass = document.getElementById('login-pass').value;
+            const token = document.getElementById('github-token').value.trim();
+
+            if (email.toLowerCase() !== CREDENTIALS.email.toLowerCase() || pass !== CREDENTIALS.pass) {
+                Swal.fire('خطأ', 'بيانات الاعتماد غير صحيحة.', 'error');
+                return;
+            }
+            if (!token || !token.startsWith('ghp_')) {
+                Swal.fire('خطأ', 'يرجى إدخال GitHub Token صحيح.', 'error');
+                return;
+            }
+
+            gh_token = token;
+            sessionStorage.setItem('cms_token', token);
+            sessionStorage.setItem('cms_auth', 'true');
+            Swal.fire({ icon: 'success', title: 'نجاح', text: 'تم تسجيل الدخول بنجاح!', timer: 1500, showConfirmButton: false }).then(() => {
+                initDashboard();
             });
         }
 
         function checkAuth() {
-            if (sessionStorage.getItem('cms_auth') === 'true') {
+            const storedToken = sessionStorage.getItem('cms_token');
+            if (sessionStorage.getItem('cms_auth') === 'true' && storedToken) {
+                gh_token = storedToken;
                 initDashboard();
             }
+        }
+
+        function isAdmin() {
+            return sessionStorage.getItem('cms_auth') === 'true';
+        }
+
+        function showEditor() {
+            const loginScreen = document.getElementById('login-screen');
+            const dashboard = document.getElementById('main-dashboard');
+            if (loginScreen) loginScreen.classList.add('hidden');
+            if (dashboard) dashboard.classList.remove('hidden');
+            hideAdsForAdmin();
+            initEditorVariables();
+        }
+
+        function hideAdsForAdmin() {
+            if (!isAdmin()) return;
+            document.querySelectorAll('[data-ad], .ad-banner, .ads, .social-bar, .banner-ad').forEach(el => el.remove());
+        }
+
+        function loadAdsForNonAdmin() {
+            if (isAdmin()) return;
+            // Non-admin users may see ads; admin sessions do not load them.
         }
 
         function logout() {
@@ -565,9 +597,7 @@
         }
 
         async function initDashboard() {
-            document.getElementById('login-screen').classList.add('hidden');
-            document.getElementById('main-dashboard').classList.remove('hidden');
-            initEditorVariables();
+            showEditor();
             Swal.fire({ title: 'جاري تحميل البيانات...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
             try {
                 await fetchArticles();
@@ -575,7 +605,7 @@
                 renderDashboard();
                 renderArticlesList();
             } catch (err) {
-                console.error("[UI] Error loading dashboard:", err);
+                console.error('[UI] Error loading dashboard:', err);
             } finally {
                 Swal.close();
                 showSection('overview');
