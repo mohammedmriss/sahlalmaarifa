@@ -528,21 +528,39 @@
         });
 
         const loginForm = document.getElementById('login-form');
-        loginForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const email = document.getElementById('login-email').value;
-            const pass = document.getElementById('login-pass').value;
-            const token = document.getElementById('github-token').value;
+        if (loginForm) {
+            loginForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                console.log("[Auth] Login attempt initiated.");
+                
+                const email = document.getElementById('login-email').value.trim();
+                const pass = document.getElementById('login-pass').value;
+                const token = document.getElementById('github-token').value.trim();
 
-            if (email === CREDENTIALS.email && pass === CREDENTIALS.pass && token.startsWith('ghp_')) {
-                sessionStorage.setItem('cms_token', token);
-                sessionStorage.setItem('cms_auth', 'true');
-                Swal.fire('نجاح', 'تم تسجيل الدخول بنجاح!', 'success');
-                initDashboard();
-            } else {
-                Swal.fire('خطأ', 'بيانات الاعتماد غير صحيحة أو التوكن غير صالح.', 'error');
-            }
-        });
+                if (email.toLowerCase() === CREDENTIALS.email.toLowerCase() && pass === CREDENTIALS.pass) {
+                    if (token.startsWith('ghp_')) {
+                        console.log("[Auth] Credentials valid. Transitioning to dashboard.");
+                        sessionStorage.setItem('cms_token', token);
+                        sessionStorage.setItem('cms_auth', 'true');
+                        
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'نجاح',
+                            text: 'تم تسجيل الدخول بنجاح!',
+                            timer: 1500,
+                            showConfirmButton: false
+                        }).then(() => {
+                            initDashboard();
+                        });
+                    } else {
+                        Swal.fire('خطأ', 'يرجى إدخال GitHub Token صحيح (يبدأ بـ ghp_).', 'error');
+                    }
+                } else {
+                    console.warn("[Auth] Invalid email or password.");
+                    Swal.fire('خطأ', 'البريد الإلكتروني أو كلمة المرور غير صحيحة.', 'error');
+                }
+            });
+        }
 
         function checkAuth() {
             if (sessionStorage.getItem('cms_auth') === 'true') {
@@ -862,21 +880,39 @@
         });
 
         const loginForm = document.getElementById('login-form');
-        loginForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const email = document.getElementById('login-email').value;
-            const pass = document.getElementById('login-pass').value;
-            const token = document.getElementById('github-token').value;
+        if (loginForm) {
+            loginForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                console.log("[Auth] Login attempt initiated.");
+                
+                const email = document.getElementById('login-email').value.trim();
+                const pass = document.getElementById('login-pass').value;
+                const token = document.getElementById('github-token').value.trim();
 
-            if (email === CREDENTIALS.email && pass === CREDENTIALS.pass && token.startsWith('ghp_')) {
-                sessionStorage.setItem('cms_token', token);
-                sessionStorage.setItem('cms_auth', 'true');
-                Swal.fire('نجاح', 'تم تسجيل الدخول بنجاح!', 'success');
-                initDashboard();
-            } else {
-                Swal.fire('خطأ', 'بيانات الاعتماد غير صحيحة أو التوكن غير صالح.', 'error');
-            }
-        });
+                if (email.toLowerCase() === CREDENTIALS.email.toLowerCase() && pass === CREDENTIALS.pass) {
+                    if (token.startsWith('ghp_')) {
+                        console.log("[Auth] Credentials valid. Transitioning to dashboard.");
+                        sessionStorage.setItem('cms_token', token);
+                        sessionStorage.setItem('cms_auth', 'true');
+                        
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'نجاح',
+                            text: 'تم تسجيل الدخول بنجاح!',
+                            timer: 1500,
+                            showConfirmButton: false
+                        }).then(() => {
+                            initDashboard();
+                        });
+                    } else {
+                        Swal.fire('خطأ', 'يرجى إدخال GitHub Token صحيح (يبدأ بـ ghp_).', 'error');
+                    }
+                } else {
+                    console.warn("[Auth] Invalid email or password.");
+                    Swal.fire('خطأ', 'البريد الإلكتروني أو كلمة المرور غير صحيحة.', 'error');
+                }
+            });
+        }
 
         function checkAuth() {
             if (sessionStorage.getItem('cms_auth') === 'true') {
