@@ -23,8 +23,78 @@
         .nav-link { transition: all 0.2s; border-right: 4px solid transparent; }
         .nav-link.active { background-color: #1e293b; border-right-color: #3b82f6; color: white; }
         .card-shadow { box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05); }
-        .ql-editor { text-align: right; min-height: 300px; font-size: 1.1rem; }
-        [dir="rtl"] .ql-snow .ql-picker:not(.ql-color-picker):not(.ql-background-picker) .ql-picker-label { padding-left: 18px; padding-right: 8px; }
+        
+        /* Custom Editor Toolbar */
+        .editor-wrapper { border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; background: white; }
+        .editor-toolbar { 
+            display: flex; 
+            align-items: center; 
+            justify-content: space-between; 
+            padding: 8px 12px; 
+            background: #f8fafc; 
+            border-bottom: 1px solid #e2e8f0;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .toolbar-groups { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
+        .toolbar-btn {
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+            color: #64748b;
+            transition: all 0.2s;
+            cursor: pointer;
+            border: none;
+            background: transparent;
+            font-weight: 700;
+        }
+        .toolbar-btn:hover { background: #e2e8f0; color: #0f172a; }
+        .toolbar-btn.active { background: #dbeafe; color: #2563eb; }
+        .toolbar-divider { width: 1px; height: 24px; background: #e2e8f0; margin: 0 4px; }
+        
+        .mode-switcher { display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 700; color: #64748b; }
+        .switch { position: relative; display: inline-block; width: 40px; height: 20px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #cbd5e1; transition: .4s; border-radius: 20px; }
+        .slider:before { position: absolute; content: ""; height: 14px; width: 14px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
+        input:checked + .slider { background-color: #2563eb; }
+        input:checked + .slider:before { transform: translateX(20px); }
+
+        /* Editor Areas */
+        .editor-content { min-height: 400px; padding: 20px; outline: none; font-size: 1.1rem; line-height: 1.6; }
+        .editor-code { width: 100%; min-height: 400px; padding: 20px; border: none; outline: none; font-family: 'Fira Code', 'Courier New', Courier, monospace; font-size: 14px; color: #1e293b; background: #fdfdfd; display: none; resize: vertical; }
+        
+        /* Dropdown */
+        .toolbar-dropdown { position: relative; }
+        .dropdown-content { 
+            display: none; 
+            position: absolute; 
+            top: 100%; 
+            right: 0; 
+            background: white; 
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); 
+            border-radius: 8px; 
+            border: 1px solid #e2e8f0; 
+            z-index: 10;
+            min-width: 150px;
+            padding: 4px;
+        }
+        .dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 12px;
+            color: #475569;
+            font-size: 13px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .dropdown-item:hover { background: #f1f5f9; color: #0f172a; }
+        .toolbar-dropdown:hover .dropdown-content { display: block; }
     </style>
 </head>
 <body class="overflow-x-hidden">
@@ -270,9 +340,54 @@
                         </div>
 
                         <div>
-                            <label class="block text-sm font-bold text-slate-700 mb-2">محتوى المقال (HTML)</label>
-                            <textarea id="art-content" required placeholder="الصق كود HTML هنا أو اكتب مقالك..." class="w-full h-96 px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 transition outline-none font-mono text-sm" dir="ltr"></textarea>
-                            <p class="text-[10px] text-slate-400 mt-1">* يدعم وسوم HTML مثل <table> و <ul> و <h2> وغيرها.</p>
+                            <label class="block text-sm font-bold text-slate-700 mb-2">محتوى المقال</label>
+                            <div class="editor-wrapper">
+                                <!-- Toolbar -->
+                                <div class="editor-toolbar">
+                                    <div class="toolbar-groups">
+                                        <button type="button" class="toolbar-btn" onclick="execCommand('bold')" title="Bold"><i class="fas fa-bold"></i></button>
+                                        <button type="button" class="toolbar-btn" onclick="execCommand('italic')" title="Italic"><i class="fas fa-italic"></i></button>
+                                        <div class="toolbar-divider"></div>
+                                        <button type="button" class="toolbar-btn" onclick="execCommand('formatBlock', 'h1')" title="Heading 1">H1</button>
+                                        <button type="button" class="toolbar-btn" onclick="execCommand('formatBlock', 'h2')" title="Heading 2">H2</button>
+                                        <div class="toolbar-divider"></div>
+                                        <button type="button" class="toolbar-btn" onclick="insertLink()" title="Link"><i class="fas fa-link"></i></button>
+                                        <button type="button" class="toolbar-btn" onclick="execCommand('formatBlock', 'blockquote')" title="Quote"><i class="fas fa-quote-right"></i></button>
+                                        <button type="button" class="toolbar-btn" onclick="execCommand('formatBlock', 'pre')" title="Code Block"><i class="fas fa-code"></i></button>
+                                        <div class="toolbar-divider"></div>
+                                        <button type="button" class="toolbar-btn" onclick="execCommand('insertUnorderedList')" title="Bullet List"><i class="fas fa-list-ul"></i></button>
+                                        <button type="button" class="toolbar-btn" onclick="execCommand('insertOrderedList')" title="Numbered List"><i class="fas fa-list-ol"></i></button>
+                                        <div class="toolbar-divider"></div>
+                                        <div class="toolbar-dropdown">
+                                            <button type="button" class="toolbar-btn" title="Insert Special"><i class="fas fa-plus"></i></button>
+                                            <div class="dropdown-content">
+                                                <div class="dropdown-item" onclick="insertTable()"><i class="fas fa-table"></i> إضافة جدول</div>
+                                                <div class="dropdown-item" onclick="document.getElementById('image-upload').click()"><i class="fas fa-image"></i> إضافة صورة</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Mode Switcher -->
+                                    <div class="mode-switcher">
+                                        <span>مرئي</span>
+                                        <label class="switch">
+                                            <input type="checkbox" id="editor-mode-toggle">
+                                            <span class="slider"></span>
+                                        </label>
+                                        <span>كود</span>
+                                    </div>
+                                </div>
+
+                                <!-- Rich Text Area -->
+                                <div id="editor-rich" class="editor-content" contenteditable="true" dir="rtl"></div>
+                                
+                                <!-- Code Area (Hidden by default) -->
+                                <textarea id="editor-code" class="editor-code" dir="ltr" spellcheck="false"></textarea>
+                                
+                                <!-- Sync Target for Form Submission -->
+                                <input type="hidden" id="art-content">
+                            </div>
+                            <p class="text-[10px] text-slate-400 mt-2">* يمكنك التبديل بين المحرر المرئي وكود HTML بسهولة.</p>
                         </div>
 
                         <div class="flex justify-end gap-4 pt-6">
@@ -306,8 +421,439 @@
         };
 
         let articlesData = [];
-        let quill = null;
         let currentSha = null;
+
+        // --- Editor Logic (Custom Implementation) ---
+        const editorRich = document.getElementById('editor-rich');
+        const editorCode = document.getElementById('editor-code');
+        const editorModeToggle = document.getElementById('editor-mode-toggle');
+        const artContentHidden = document.getElementById('art-content');
+
+        // Mode Switching & Sync
+        editorModeToggle.addEventListener('change', () => {
+            const isCodeMode = editorModeToggle.checked;
+            if (isCodeMode) {
+                // Rich -> Code
+                editorCode.value = editorRich.innerHTML;
+                editorRich.style.display = 'none';
+                editorCode.style.display = 'block';
+            } else {
+                // Code -> Rich
+                editorRich.innerHTML = editorCode.value;
+                editorCode.style.display = 'none';
+                editorRich.style.display = 'block';
+            }
+        });
+
+        // Universal Command Execution
+        function execCommand(command, value = null) {
+            const isCodeMode = editorModeToggle.checked;
+            
+            if (!isCodeMode) {
+                // Rich Mode: Use document.execCommand
+                document.execCommand(command, false, value);
+                editorRich.focus();
+            } else {
+                // Code Mode: Wrap selection with tags
+                wrapSelectionWithTags(command, value);
+            }
+            syncContent();
+        }
+
+        function wrapSelectionWithTags(command, value) {
+            const start = editorCode.selectionStart;
+            const end = editorCode.selectionEnd;
+            const text = editorCode.value;
+            const selectedText = text.substring(start, end);
+            
+            let wrappedText = '';
+            switch(command) {
+                case 'bold': wrappedText = `<b>${selectedText}</b>`; break;
+                case 'italic': wrappedText = `<i>${selectedText}</i>`; break;
+                case 'formatBlock': wrappedText = `<${value}>${selectedText}</${value}>`; break;
+                case 'insertUnorderedList': wrappedText = `<ul>\n  <li>${selectedText}</li>\n</ul>`; break;
+                case 'insertOrderedList': wrappedText = `<ol>\n  <li>${selectedText}</li>\n</ol>`; break;
+                default: wrappedText = selectedText;
+            }
+            
+            editorCode.value = text.substring(0, start) + wrappedText + text.substring(end);
+            editorCode.focus();
+            editorCode.setSelectionRange(start + wrappedText.length, start + wrappedText.length);
+        }
+
+        function insertLink() {
+            const url = prompt("Enter URL:", "https://");
+            if (url) execCommand('createLink', url);
+        }
+
+        function insertTable() {
+            const rows = prompt("Number of rows:", "3");
+            const cols = prompt("Number of columns:", "2");
+            if (!rows || !cols) return;
+
+            let tableHtml = '<table border="1" style="width:100%">\n  <thead>\n    <tr>';
+            for(let i=0; i<cols; i++) tableHtml += '\n      <th>رأس الجدول</th>';
+            tableHtml += '\n    </tr>\n  </thead>\n  <tbody>';
+            for(let r=0; r<rows; r++) {
+                tableHtml += '\n    <tr>';
+                for(let c=0; c<cols; c++) tableHtml += '\n      <td>خلية</td>';
+                tableHtml += '\n    </tr>';
+            }
+            tableHtml += '\n  </tbody>\n</table>';
+
+            if (editorModeToggle.checked) {
+                const start = editorCode.selectionStart;
+                const text = editorCode.value;
+                editorCode.value = text.substring(0, start) + tableHtml + text.substring(start);
+            } else {
+                document.execCommand('insertHTML', false, tableHtml);
+            }
+            syncContent();
+        }
+
+        function syncContent() {
+            if (editorModeToggle.checked) {
+                artContentHidden.value = editorCode.value;
+                editorRich.innerHTML = editorCode.value;
+            } else {
+                artContentHidden.value = editorRich.innerHTML;
+                editorCode.value = editorRich.innerHTML;
+            }
+        }
+
+        // --- Auth System ---
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log("CMS Initializing...");
+            checkAuth();
+        });
+
+        const loginForm = document.getElementById('login-form');
+        loginForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const email = document.getElementById('login-email').value;
+            const pass = document.getElementById('login-pass').value;
+            const token = document.getElementById('github-token').value;
+
+            if (email === CREDENTIALS.email && pass === CREDENTIALS.pass && token.startsWith('ghp_')) {
+                sessionStorage.setItem('cms_token', token);
+                sessionStorage.setItem('cms_auth', 'true');
+                Swal.fire('نجاح', 'تم تسجيل الدخول بنجاح!', 'success');
+                initDashboard();
+            } else {
+                Swal.fire('خطأ', 'بيانات الاعتماد غير صحيحة أو التوكن غير صالح.', 'error');
+            }
+        });
+
+        function checkAuth() {
+            if (sessionStorage.getItem('cms_auth') === 'true') {
+                initDashboard();
+            }
+        }
+
+        function logout() {
+            sessionStorage.clear();
+            location.reload();
+        }
+
+        // --- Dashboard Initialization ---
+        async function initDashboard() {
+            document.getElementById('login-screen').classList.add('hidden');
+            document.getElementById('main-dashboard').classList.remove('hidden');
+            
+            Swal.fire({
+                title: 'جاري تحميل البيانات...',
+                allowOutsideClick: false,
+                didOpen: () => Swal.showLoading()
+            });
+
+            await fetchArticles();
+            
+            populateCategoryDropdowns();
+            renderDashboard();
+            renderArticlesList();
+            
+            Swal.close();
+            showSection('overview');
+        }
+
+        // --- GitHub API Engine ---
+        async function githubAPI(path, method = 'GET', body = null) {
+            const token = sessionStorage.getItem('cms_token');
+            // Cache Buster: Append timestamp to the path to ensure we always hit the latest version
+            const separator = path.includes('?') ? '&' : '?';
+            const cacheBuster = `${separator}v=${Date.now()}`;
+            const url = `https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${path}${method === 'GET' ? cacheBuster : ''}`;
+            
+            const options = {
+                method,
+                headers: {
+                    'Authorization': `token ${token}`,
+                    'Accept': 'application/vnd.github.v3+json',
+                    'Content-Type': 'application/json'
+                }
+            };
+
+            if (body) options.body = JSON.stringify(body);
+
+            const response = await fetch(url, options);
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.message || 'GitHub API Error');
+            }
+            return await response.json();
+        }
+
+        async function fetchArticles() {
+            try {
+                const data = await githubAPI(CONFIG.articlesFile);
+                currentSha = data.sha;
+                const content = atob(data.content);
+                const decoded = decodeURIComponent(escape(content));
+                articlesData = JSON.parse(decoded);
+                console.log("Articles Data Loaded Successfully:", articlesData);
+                return articlesData;
+            } catch (err) {
+                console.error("Fetch Error:", err);
+                articlesData = [];
+                // If it's a 404, the file just doesn't exist yet, which is fine
+                if (!err.message.includes('Not Found')) {
+                    Swal.fire('خطأ', 'تعذر جلب البيانات من GitHub: ' + err.message, 'error');
+                }
+                return [];
+            }
+        }
+
+        async function pushArticles(newArticles, message = 'Update articles via CMS') {
+            const jsonString = JSON.stringify(newArticles, null, 2);
+            // Proper UTF-8 to Base64
+            const encoded = btoa(unescape(encodeURIComponent(jsonString)));
+            
+            // CRITICAL: Always get fresh SHA before update
+            const freshData = await githubAPI(CONFIG.articlesFile);
+            
+            const body = {
+                message,
+                content: encoded,
+                sha: freshData.sha,
+                branch: CONFIG.branch
+            };
+
+            return await githubAPI(CONFIG.articlesFile, 'PUT', body);
+        }
+
+        async function uploadImage(file) {
+            const reader = new FileReader();
+            return new Promise((resolve, reject) => {
+                reader.onload = async () => {
+                    const base64 = reader.result.split(',')[1];
+                    const fileName = `${Date.now()}_${file.name.replace(/\s+/g, '_')}`;
+                    const path = `${CONFIG.uploadsFolder}/${fileName}`;
+                    
+                    try {
+                        const res = await githubAPI(path, 'PUT', {
+                            message: `Upload image: ${fileName}`,
+                            content: base64,
+                            branch: CONFIG.branch
+                        });
+                        // Use GitHub Raw URL for guaranteed rendering on frontend
+                        const rawUrl = `https://raw.githubusercontent.com/${CONFIG.owner}/${CONFIG.repo}/${CONFIG.branch}/${path}`;
+                        resolve(rawUrl);
+                    } catch (err) {
+                        reject(err);
+                    }
+                };
+                reader.onerror = reject;
+                reader.readAsDataURL(file);
+            });
+        }
+
+        // --- UI Rendering ---
+        function showSection(id) {
+            const sections = ['overview', 'articles', 'categories', 'media'];
+            sections.forEach(s => {
+                document.getElementById(`section-${s}`).classList.toggle('hidden', s !== id);
+                document.getElementById(`link-${s}`).classList.toggle('active', s === id);
+            });
+
+            // Update Header
+            const meta = {
+                overview: { title: 'لوحة التحكم', desc: 'إحصائيات وأداء الموقع بشكل عام.' },
+                articles: { title: 'إدارة المقالات', desc: 'استعراض، تعديل، وحذف المقالات المنشورة.' },
+                categories: { title: 'التصنيفات', desc: 'إدارة وتخصيص أقسام المدونة.' },
+                media: { title: 'مكتبة الوسائط', desc: 'الصور والملفات المرفوعة.' }
+            };
+            document.getElementById('section-title').innerText = meta[id].title;
+            document.getElementById('section-desc').innerText = meta[id].desc;
+
+            if (id === 'articles') renderArticlesList();
+            if (id === 'overview') renderDashboard();
+        }
+
+        function renderDashboard() {
+            document.getElementById('stat-articles').innerText = articlesData.length;
+            const cats = [...new Set(articlesData.map(a => a.category))];
+            document.getElementById('stat-categories').innerText = cats.length;
+
+            const list = document.getElementById('recent-articles-list');
+            
+            // Fix: Show "No articles" message if data is empty
+            if (articlesData.length === 0) {
+                list.innerHTML = `<tr><td colspan="4" class="px-6 py-12 text-center text-slate-400 font-bold">لا توجد مقالات لعرضها حالياً.</td></tr>`;
+                return;
+            }
+
+            const recent = articlesData.slice(-5).reverse();
+            list.innerHTML = recent.map(art => `
+                <tr class="border-b border-slate-50 hover:bg-slate-50 transition">
+                    <td class="px-6 py-4 font-bold text-slate-700">${art.title.substring(0, 40)}...</td>
+                    <td class="px-6 py-4"><span class="px-3 py-1 bg-blue-50 text-blue-600 rounded-full text-xs font-bold">${art.category}</span></td>
+                    <td class="px-6 py-4 text-slate-500 text-sm">${new Date(art.date).toLocaleDateString('ar-EG')}</td>
+                    <td class="px-6 py-4"><span class="flex items-center gap-2 text-emerald-500 text-xs font-bold"><i class="fas fa-circle text-[8px]"></i> منشور</span></td>
+                </tr>
+            `).join('');
+        }
+
+        function renderArticlesList() {
+            const list = document.getElementById('full-articles-list');
+            
+            // Fix: Show empty state for main articles list
+            if (articlesData.length === 0) {
+                list.innerHTML = `<tr><td colspan="5" class="px-6 py-12 text-center text-slate-400 font-bold">لا توجد مقالات في قاعدة البيانات.</td></tr>`;
+                return;
+            }
+
+            const sorted = [...articlesData].reverse();
+            list.innerHTML = sorted.map(art => `
+                <tr class="border-b border-slate-50 hover:bg-slate-50 transition">
+                    <td class="px-6 py-4">
+                        <img src="${art.image}" class="w-16 h-10 object-cover rounded-lg shadow-sm" onerror="this.src='https://via.placeholder.com/80x50?text=No+Image'">
+                    </td>
+                    <td class="px-6 py-4">
+                        <div class="font-bold text-slate-800">${art.title}</div>
+                        <div class="text-[10px] text-slate-400 mt-1">ID: ${art.id}</div>
+                    </td>
+                    <td class="px-6 py-4"><span class="px-3 py-1 bg-slate-100 text-slate-600 rounded-full text-xs font-bold">${art.category}</span></td>
+                    <td class="px-6 py-4 text-slate-500 text-sm">${new Date(art.date).toLocaleDateString('ar-EG')}</td>
+                    <td class="px-6 py-4">
+                        <div class="flex gap-2">
+                            <button onclick="editArticle(${art.id})" class="w-8 h-8 bg-amber-50 text-amber-600 rounded-lg hover:bg-amber-100 transition"><i class="fas fa-edit"></i></button>
+                            <button onclick="deleteArticle(${art.id})" class="w-8 h-8 bg-rose-50 text-rose-600 rounded-lg hover:bg-rose-100 transition"><i class="fas fa-trash"></i></button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function populateCategoryDropdowns() {
+            const cats = ["أخبار", "وظائف", "الهجرة", "رياضة", "الطبخ", "تعليم السياقة", "أفلام", "ربح المال", "حرف ومشاريع", "وثائق إدارية", "إصلاح"];
+            const select = document.getElementById('art-category');
+            if (select) select.innerHTML = cats.map(c => `<option value="${c}">${c}</option>`).join('');
+            
+            const filter = document.getElementById('filter-category');
+            if (filter) filter.innerHTML = '<option value="">كل التصنيفات</option>' + cats.map(c => `<option value="${c}">${c}</option>`).join('');
+        }
+
+        // --- Editor Logic (Custom Implementation) ---
+        const editorRich = document.getElementById('editor-rich');
+        const editorCode = document.getElementById('editor-code');
+        const editorModeToggle = document.getElementById('editor-mode-toggle');
+        const artContentHidden = document.getElementById('art-content');
+
+        // Mode Switching & Sync
+        editorModeToggle.addEventListener('change', () => {
+            const isCodeMode = editorModeToggle.checked;
+            if (isCodeMode) {
+                // Rich -> Code
+                editorCode.value = editorRich.innerHTML;
+                editorRich.style.display = 'none';
+                editorCode.style.display = 'block';
+            } else {
+                // Code -> Rich
+                editorRich.innerHTML = editorCode.value;
+                editorCode.style.display = 'none';
+                editorRich.style.display = 'block';
+            }
+        });
+
+        // Track changes in both modes
+        editorRich.addEventListener('input', syncContent);
+        editorCode.addEventListener('input', syncContent);
+
+        // Universal Command Execution
+        function execCommand(command, value = null) {
+            const isCodeMode = editorModeToggle.checked;
+            
+            if (!isCodeMode) {
+                // Rich Mode: Use document.execCommand
+                document.execCommand(command, false, value);
+                editorRich.focus();
+            } else {
+                // Code Mode: Wrap selection with tags
+                wrapSelectionWithTags(command, value);
+            }
+            syncContent();
+        }
+
+        function wrapSelectionWithTags(command, value) {
+            const start = editorCode.selectionStart;
+            const end = editorCode.selectionEnd;
+            const text = editorCode.value;
+            const selectedText = text.substring(start, end);
+            
+            let wrappedText = '';
+            switch(command) {
+                case 'bold': wrappedText = `<b>${selectedText}</b>`; break;
+                case 'italic': wrappedText = `<i>${selectedText}</i>`; break;
+                case 'formatBlock': wrappedText = `<${value}>${selectedText}</${value}>`; break;
+                case 'insertUnorderedList': wrappedText = `<ul>\n  <li>${selectedText}</li>\n</ul>`; break;
+                case 'insertOrderedList': wrappedText = `<ol>\n  <li>${selectedText}</li>\n</ol>`; break;
+                default: wrappedText = selectedText;
+            }
+            
+            editorCode.value = text.substring(0, start) + wrappedText + text.substring(end);
+            editorCode.focus();
+            editorCode.setSelectionRange(start + wrappedText.length, start + wrappedText.length);
+        }
+
+        function insertLink() {
+            const url = prompt("Enter URL:", "https://");
+            if (url) execCommand('createLink', url);
+        }
+
+        function insertTable() {
+            const rows = prompt("Number of rows:", "3");
+            const cols = prompt("Number of columns:", "2");
+            if (!rows || !cols) return;
+
+            let tableHtml = '\n<table border="1" style="width:100%">\n  <thead>\n    <tr>';
+            for(let i=0; i<cols; i++) tableHtml += '\n      <th>رأس الجدول</th>';
+            tableHtml += '\n    </tr>\n  </thead>\n  <tbody>';
+            for(let r=0; r<rows; r++) {
+                tableHtml += '\n    <tr>';
+                for(let c=0; c<cols; c++) tableHtml += '\n      <td>خلية</td>';
+                tableHtml += '\n    </tr>';
+            }
+            tableHtml += '\n  </tbody>\n</table>\n';
+
+            if (editorModeToggle.checked) {
+                const start = editorCode.selectionStart;
+                const text = editorCode.value;
+                editorCode.value = text.substring(0, start) + tableHtml + text.substring(start);
+            } else {
+                document.execCommand('insertHTML', false, tableHtml);
+            }
+            syncContent();
+        }
+
+        function syncContent() {
+            if (editorModeToggle.checked) {
+                artContentHidden.value = editorCode.value;
+                editorRich.innerHTML = editorCode.value;
+            } else {
+                artContentHidden.value = editorRich.innerHTML;
+                editorCode.value = editorRich.innerHTML;
+            }
+        }
 
         // --- Auth System ---
         document.addEventListener('DOMContentLoaded', () => {
@@ -546,7 +1092,15 @@
             document.getElementById('edit-id').value = '';
             document.getElementById('art-title').value = '';
             document.getElementById('art-image').value = '';
-            document.getElementById('art-content').value = ''; // Reset textarea
+            
+            // Reset Editor areas
+            editorRich.innerHTML = '';
+            editorCode.value = '';
+            artContentHidden.value = '';
+            editorModeToggle.checked = false;
+            editorRich.style.display = 'block';
+            editorCode.style.display = 'none';
+
             document.getElementById('image-preview').innerHTML = '<i class="fas fa-image text-4xl text-slate-300"></i>';
             
             document.getElementById('editor-title').innerText = 'إضافة مقال جديد';
@@ -565,6 +1119,16 @@
                     const url = await uploadImage(e.target.files[0]);
                     document.getElementById('art-image').value = url;
                     updateImagePreview(url);
+                    
+                    // Also inject into editor
+                    if (editorModeToggle.checked) {
+                        const start = editorCode.selectionStart;
+                        editorCode.value = editorCode.value.substring(0, start) + `<img src="${url}" alt="image">` + editorCode.value.substring(start);
+                    } else {
+                        document.execCommand('insertImage', false, url);
+                    }
+                    syncContent();
+
                     Swal.fire('نجاح', 'تم رفع الصورة بنجاح!', 'success');
                 } catch (err) {
                     Swal.fire('خطأ', 'فشل رفع الصورة.', 'error');
@@ -586,8 +1150,10 @@
             e.preventDefault();
             const id = document.getElementById('edit-id').value;
             
-            // Capture raw HTML from textarea
-            const articleBody = document.getElementById('art-content').value;
+            // Final Sync
+            syncContent();
+            
+            const articleBody = artContentHidden.value;
             const articleTitle = document.getElementById('art-title').value;
             const articleCategory = document.getElementById('art-category').value;
             const articleImage = document.getElementById('art-image').value;
@@ -651,7 +1217,15 @@
             document.getElementById('art-category').value = art.category;
             document.getElementById('art-image').value = art.image;
             updateImagePreview(art.image);
-            document.getElementById('art-content').value = art.content; // Set raw HTML
+            
+            // Load content into both areas
+            editorRich.innerHTML = art.content;
+            editorCode.value = art.content;
+            artContentHidden.value = art.content;
+            
+            editorModeToggle.checked = false;
+            editorRich.style.display = 'block';
+            editorCode.style.display = 'none';
 
             document.getElementById('editor-title').innerText = 'تعديل مقال';
             document.getElementById('btn-text').innerText = 'تحديث المقال';
