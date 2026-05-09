@@ -408,6 +408,62 @@ img {
     margin-bottom: 25px;
 }
 
+/* Professional HTML Tables Styling */
+.article-body table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 30px 0;
+    font-size: 1rem;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    background: white;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+.article-body thead tr {
+    background-color: var(--primary);
+    color: #ffffff;
+    text-align: right;
+}
+
+.article-body th,
+.article-body td {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border);
+    text-align: right;
+}
+
+.article-body tbody tr:nth-of-type(even) {
+    background-color: #f8fafc;
+}
+
+.article-body tbody tr:last-of-type {
+    border-bottom: 3px solid var(--primary);
+}
+
+.article-body tbody tr:hover {
+    background-color: #f1f5f9;
+    transition: background-color 0.2s ease;
+}
+
+/* Responsive Table Wrapper for Mobile */
+@media (max-width: 768px) {
+    .article-body {
+        overflow-x: hidden;
+    }
+    
+    /* Force tables to be scrollable if too wide */
+    .article-body table {
+        display: block;
+        width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        white-space: nowrap;
+        border-radius: 8px;
+    }
+}
+
 /* Footer */
 .main-footer {
     background: white;
