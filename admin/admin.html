@@ -420,382 +420,47 @@
             pass: 'Mohammed@2026'
         };
 
+        // --- State Variables ---
         let articlesData = [];
         let currentSha = null;
 
         // --- Editor Logic (Custom Implementation) ---
-        const editorRich = document.getElementById('editor-rich');
-        const editorCode = document.getElementById('editor-code');
-        const editorModeToggle = document.getElementById('editor-mode-toggle');
-        const artContentHidden = document.getElementById('art-content');
+        // Declare globally to avoid re-declaration errors
+        let editorRich, editorCode, editorModeToggle, artContentHidden;
 
-        // Mode Switching & Sync
-        editorModeToggle.addEventListener('change', () => {
-            const isCodeMode = editorModeToggle.checked;
-            if (isCodeMode) {
-                // Rich -> Code
-                editorCode.value = editorRich.innerHTML;
-                editorRich.style.display = 'none';
-                editorCode.style.display = 'block';
-            } else {
-                // Code -> Rich
-                editorRich.innerHTML = editorCode.value;
-                editorCode.style.display = 'none';
-                editorRich.style.display = 'block';
-            }
-        });
+        function initEditorVariables() {
+            editorRich = document.getElementById('editor-rich');
+            editorCode = document.getElementById('editor-code');
+            editorModeToggle = document.getElementById('editor-mode-toggle');
+            artContentHidden = document.getElementById('art-content');
 
-        // Universal Command Execution
-        function execCommand(command, value = null) {
-            const isCodeMode = editorModeToggle.checked;
-            
-            if (!isCodeMode) {
-                // Rich Mode: Use document.execCommand
-                document.execCommand(command, false, value);
-                editorRich.focus();
-            } else {
-                // Code Mode: Wrap selection with tags
-                wrapSelectionWithTags(command, value);
-            }
-            syncContent();
-        }
-
-        function wrapSelectionWithTags(command, value) {
-            const start = editorCode.selectionStart;
-            const end = editorCode.selectionEnd;
-            const text = editorCode.value;
-            const selectedText = text.substring(start, end);
-            
-            let wrappedText = '';
-            switch(command) {
-                case 'bold': wrappedText = `<b>${selectedText}</b>`; break;
-                case 'italic': wrappedText = `<i>${selectedText}</i>`; break;
-                case 'formatBlock': wrappedText = `<${value}>${selectedText}</${value}>`; break;
-                case 'insertUnorderedList': wrappedText = `<ul>\n  <li>${selectedText}</li>\n</ul>`; break;
-                case 'insertOrderedList': wrappedText = `<ol>\n  <li>${selectedText}</li>\n</ol>`; break;
-                default: wrappedText = selectedText;
-            }
-            
-            editorCode.value = text.substring(0, start) + wrappedText + text.substring(end);
-            editorCode.focus();
-            editorCode.setSelectionRange(start + wrappedText.length, start + wrappedText.length);
-        }
-
-        function insertLink() {
-            const url = prompt("Enter URL:", "https://");
-            if (url) execCommand('createLink', url);
-        }
-
-        function insertTable() {
-            const rows = prompt("Number of rows:", "3");
-            const cols = prompt("Number of columns:", "2");
-            if (!rows || !cols) return;
-
-            let tableHtml = '<table border="1" style="width:100%">\n  <thead>\n    <tr>';
-            for(let i=0; i<cols; i++) tableHtml += '\n      <th>رأس الجدول</th>';
-            tableHtml += '\n    </tr>\n  </thead>\n  <tbody>';
-            for(let r=0; r<rows; r++) {
-                tableHtml += '\n    <tr>';
-                for(let c=0; c<cols; c++) tableHtml += '\n      <td>خلية</td>';
-                tableHtml += '\n    </tr>';
-            }
-            tableHtml += '\n  </tbody>\n</table>';
-
-            if (editorModeToggle.checked) {
-                const start = editorCode.selectionStart;
-                const text = editorCode.value;
-                editorCode.value = text.substring(0, start) + tableHtml + text.substring(start);
-            } else {
-                document.execCommand('insertHTML', false, tableHtml);
-            }
-            syncContent();
-        }
-
-        function syncContent() {
-            if (editorModeToggle.checked) {
-                artContentHidden.value = editorCode.value;
-                editorRich.innerHTML = editorCode.value;
-            } else {
-                artContentHidden.value = editorRich.innerHTML;
-                editorCode.value = editorRich.innerHTML;
-            }
-        }
-
-        // --- Auth System ---
-        document.addEventListener('DOMContentLoaded', () => {
-            console.log("CMS Initializing...");
-            checkAuth();
-        });
-
-        const loginForm = document.getElementById('login-form');
-        if (loginForm) {
-            loginForm.addEventListener('submit', (e) => {
-                e.preventDefault();
-                console.log("[Auth] Login attempt initiated.");
-                
-                const email = document.getElementById('login-email').value.trim();
-                const pass = document.getElementById('login-pass').value;
-                const token = document.getElementById('github-token').value.trim();
-
-                if (email.toLowerCase() === CREDENTIALS.email.toLowerCase() && pass === CREDENTIALS.pass) {
-                    if (token.startsWith('ghp_')) {
-                        console.log("[Auth] Credentials valid. Transitioning to dashboard.");
-                        sessionStorage.setItem('cms_token', token);
-                        sessionStorage.setItem('cms_auth', 'true');
-                        
-                        Swal.fire({
-                            icon: 'success',
-                            title: 'نجاح',
-                            text: 'تم تسجيل الدخول بنجاح!',
-                            timer: 1500,
-                            showConfirmButton: false
-                        }).then(() => {
-                            initDashboard();
-                        });
+            // Set up Mode Switching & Sync
+            if (editorModeToggle && !editorModeToggle.dataset.init) {
+                editorModeToggle.addEventListener('change', () => {
+                    const isCodeMode = editorModeToggle.checked;
+                    if (isCodeMode) {
+                        editorCode.value = editorRich.innerHTML;
+                        editorRich.style.display = 'none';
+                        editorCode.style.display = 'block';
                     } else {
-                        Swal.fire('خطأ', 'يرجى إدخال GitHub Token صحيح (يبدأ بـ ghp_).', 'error');
+                        editorRich.innerHTML = editorCode.value;
+                        editorCode.style.display = 'none';
+                        editorRich.style.display = 'block';
                     }
-                } else {
-                    console.warn("[Auth] Invalid email or password.");
-                    Swal.fire('خطأ', 'البريد الإلكتروني أو كلمة المرور غير صحيحة.', 'error');
-                }
-            });
-        }
-
-        function checkAuth() {
-            if (sessionStorage.getItem('cms_auth') === 'true') {
-                initDashboard();
-            }
-        }
-
-        function logout() {
-            sessionStorage.clear();
-            location.reload();
-        }
-
-        // --- Dashboard Initialization ---
-        async function initDashboard() {
-            document.getElementById('login-screen').classList.add('hidden');
-            document.getElementById('main-dashboard').classList.remove('hidden');
-            
-            Swal.fire({
-                title: 'جاري تحميل البيانات...',
-                allowOutsideClick: false,
-                didOpen: () => Swal.showLoading()
-            });
-
-            await fetchArticles();
-            
-            populateCategoryDropdowns();
-            renderDashboard();
-            renderArticlesList();
-            
-            Swal.close();
-            showSection('overview');
-        }
-
-        // --- GitHub API Engine ---
-        async function githubAPI(path, method = 'GET', body = null) {
-            const token = sessionStorage.getItem('cms_token');
-            // Cache Buster: Append timestamp to the path to ensure we always hit the latest version
-            const separator = path.includes('?') ? '&' : '?';
-            const cacheBuster = `${separator}v=${Date.now()}`;
-            const url = `https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${path}${method === 'GET' ? cacheBuster : ''}`;
-            
-            const options = {
-                method,
-                headers: {
-                    'Authorization': `token ${token}`,
-                    'Accept': 'application/vnd.github.v3+json',
-                    'Content-Type': 'application/json'
-                }
-            };
-
-            if (body) options.body = JSON.stringify(body);
-
-            const response = await fetch(url, options);
-            if (!response.ok) {
-                const error = await response.json();
-                throw new Error(error.message || 'GitHub API Error');
-            }
-            return await response.json();
-        }
-
-        async function fetchArticles() {
-            try {
-                const data = await githubAPI(CONFIG.articlesFile);
-                currentSha = data.sha;
-                const content = atob(data.content);
-                const decoded = decodeURIComponent(escape(content));
-                articlesData = JSON.parse(decoded);
-                console.log("Articles Data Loaded Successfully:", articlesData);
-                return articlesData;
-            } catch (err) {
-                console.error("Fetch Error:", err);
-                articlesData = [];
-                // If it's a 404, the file just doesn't exist yet, which is fine
-                if (!err.message.includes('Not Found')) {
-                    Swal.fire('خطأ', 'تعذر جلب البيانات من GitHub: ' + err.message, 'error');
-                }
-                return [];
-            }
-        }
-
-        async function pushArticles(newArticles, message = 'Update articles via CMS') {
-            const jsonString = JSON.stringify(newArticles, null, 2);
-            // Proper UTF-8 to Base64
-            const encoded = btoa(unescape(encodeURIComponent(jsonString)));
-            
-            // CRITICAL: Always get fresh SHA before update
-            const freshData = await githubAPI(CONFIG.articlesFile);
-            
-            const body = {
-                message,
-                content: encoded,
-                sha: freshData.sha,
-                branch: CONFIG.branch
-            };
-
-            return await githubAPI(CONFIG.articlesFile, 'PUT', body);
-        }
-
-        async function uploadImage(file) {
-            const reader = new FileReader();
-            return new Promise((resolve, reject) => {
-                reader.onload = async () => {
-                    const base64 = reader.result.split(',')[1];
-                    const fileName = `${Date.now()}_${file.name.replace(/\s+/g, '_')}`;
-                    const path = `${CONFIG.uploadsFolder}/${fileName}`;
-                    
-                    try {
-                        const res = await githubAPI(path, 'PUT', {
-                            message: `Upload image: ${fileName}`,
-                            content: base64,
-                            branch: CONFIG.branch
-                        });
-                        // Use GitHub Raw URL for guaranteed rendering on frontend
-                        const rawUrl = `https://raw.githubusercontent.com/${CONFIG.owner}/${CONFIG.repo}/${CONFIG.branch}/${path}`;
-                        resolve(rawUrl);
-                    } catch (err) {
-                        reject(err);
-                    }
-                };
-                reader.onerror = reject;
-                reader.readAsDataURL(file);
-            });
-        }
-
-        // --- UI Rendering ---
-        function showSection(id) {
-            const sections = ['overview', 'articles', 'categories', 'media'];
-            sections.forEach(s => {
-                document.getElementById(`section-${s}`).classList.toggle('hidden', s !== id);
-                document.getElementById(`link-${s}`).classList.toggle('active', s === id);
-            });
-
-            // Update Header
-            const meta = {
-                overview: { title: 'لوحة التحكم', desc: 'إحصائيات وأداء الموقع بشكل عام.' },
-                articles: { title: 'إدارة المقالات', desc: 'استعراض، تعديل، وحذف المقالات المنشورة.' },
-                categories: { title: 'التصنيفات', desc: 'إدارة وتخصيص أقسام المدونة.' },
-                media: { title: 'مكتبة الوسائط', desc: 'الصور والملفات المرفوعة.' }
-            };
-            document.getElementById('section-title').innerText = meta[id].title;
-            document.getElementById('section-desc').innerText = meta[id].desc;
-
-            if (id === 'articles') renderArticlesList();
-            if (id === 'overview') renderDashboard();
-        }
-
-        function renderDashboard() {
-            document.getElementById('stat-articles').innerText = articlesData.length;
-            const cats = [...new Set(articlesData.map(a => a.category))];
-            document.getElementById('stat-categories').innerText = cats.length;
-
-            const list = document.getElementById('recent-articles-list');
-            
-            // Fix: Show "No articles" message if data is empty
-            if (articlesData.length === 0) {
-                list.innerHTML = `<tr><td colspan="4" class="px-6 py-12 text-center text-slate-400 font-bold">لا توجد مقالات لعرضها حالياً.</td></tr>`;
-                return;
+                });
+                editorModeToggle.dataset.init = "true";
             }
 
-            const recent = articlesData.slice(-5).reverse();
-            list.innerHTML = recent.map(art => `
-                <tr class="border-b border-slate-50 hover:bg-slate-50 transition">
-                    <td class="px-6 py-4 font-bold text-slate-700">${art.title.substring(0, 40)}...</td>
-                    <td class="px-6 py-4"><span class="px-3 py-1 bg-blue-50 text-blue-600 rounded-full text-xs font-bold">${art.category}</span></td>
-                    <td class="px-6 py-4 text-slate-500 text-sm">${new Date(art.date).toLocaleDateString('ar-EG')}</td>
-                    <td class="px-6 py-4"><span class="flex items-center gap-2 text-emerald-500 text-xs font-bold"><i class="fas fa-circle text-[8px]"></i> منشور</span></td>
-                </tr>
-            `).join('');
-        }
-
-        function renderArticlesList() {
-            const list = document.getElementById('full-articles-list');
-            
-            // Fix: Show empty state for main articles list
-            if (articlesData.length === 0) {
-                list.innerHTML = `<tr><td colspan="5" class="px-6 py-12 text-center text-slate-400 font-bold">لا توجد مقالات في قاعدة البيانات.</td></tr>`;
-                return;
+            // Track changes in both modes
+            if (editorRich && !editorRich.dataset.init) {
+                editorRich.addEventListener('input', syncContent);
+                editorRich.dataset.init = "true";
             }
-
-            const sorted = [...articlesData].reverse();
-            list.innerHTML = sorted.map(art => `
-                <tr class="border-b border-slate-50 hover:bg-slate-50 transition">
-                    <td class="px-6 py-4">
-                        <img src="${art.image}" class="w-16 h-10 object-cover rounded-lg shadow-sm" onerror="this.src='https://via.placeholder.com/80x50?text=No+Image'">
-                    </td>
-                    <td class="px-6 py-4">
-                        <div class="font-bold text-slate-800">${art.title}</div>
-                        <div class="text-[10px] text-slate-400 mt-1">ID: ${art.id}</div>
-                    </td>
-                    <td class="px-6 py-4"><span class="px-3 py-1 bg-slate-100 text-slate-600 rounded-full text-xs font-bold">${art.category}</span></td>
-                    <td class="px-6 py-4 text-slate-500 text-sm">${new Date(art.date).toLocaleDateString('ar-EG')}</td>
-                    <td class="px-6 py-4">
-                        <div class="flex gap-2">
-                            <button onclick="editArticle(${art.id})" class="w-8 h-8 bg-amber-50 text-amber-600 rounded-lg hover:bg-amber-100 transition"><i class="fas fa-edit"></i></button>
-                            <button onclick="deleteArticle(${art.id})" class="w-8 h-8 bg-rose-50 text-rose-600 rounded-lg hover:bg-rose-100 transition"><i class="fas fa-trash"></i></button>
-                        </div>
-                    </td>
-                </tr>
-            `).join('');
-        }
-
-        function populateCategoryDropdowns() {
-            const cats = ["أخبار", "وظائف", "الهجرة", "رياضة", "الطبخ", "تعليم السياقة", "أفلام", "ربح المال", "حرف ومشاريع", "وثائق إدارية", "إصلاح"];
-            const select = document.getElementById('art-category');
-            if (select) select.innerHTML = cats.map(c => `<option value="${c}">${c}</option>`).join('');
-            
-            const filter = document.getElementById('filter-category');
-            if (filter) filter.innerHTML = '<option value="">كل التصنيفات</option>' + cats.map(c => `<option value="${c}">${c}</option>`).join('');
-        }
-
-        // --- Editor Logic (Custom Implementation) ---
-        const editorRich = document.getElementById('editor-rich');
-        const editorCode = document.getElementById('editor-code');
-        const editorModeToggle = document.getElementById('editor-mode-toggle');
-        const artContentHidden = document.getElementById('art-content');
-
-        // Mode Switching & Sync
-        editorModeToggle.addEventListener('change', () => {
-            const isCodeMode = editorModeToggle.checked;
-            if (isCodeMode) {
-                // Rich -> Code
-                editorCode.value = editorRich.innerHTML;
-                editorRich.style.display = 'none';
-                editorCode.style.display = 'block';
-            } else {
-                // Code -> Rich
-                editorRich.innerHTML = editorCode.value;
-                editorCode.style.display = 'none';
-                editorRich.style.display = 'block';
+            if (editorCode && !editorCode.dataset.init) {
+                editorCode.addEventListener('input', syncContent);
+                editorCode.dataset.init = "true";
             }
-        });
-
-        // Track changes in both modes
-        editorRich.addEventListener('input', syncContent);
-        editorCode.addEventListener('input', syncContent);
+        }
 
         // Universal Command Execution
         function execCommand(command, value = null) {
@@ -875,7 +540,7 @@
 
         // --- Auth System ---
         document.addEventListener('DOMContentLoaded', () => {
-            console.log("CMS Initializing...");
+            console.log("[Auth] CMS Page Loaded.");
             checkAuth();
         });
 
@@ -915,36 +580,422 @@
         }
 
         function checkAuth() {
-            if (sessionStorage.getItem('cms_auth') === 'true') {
+            const isAuth = sessionStorage.getItem('cms_auth') === 'true';
+            if (isAuth) {
                 initDashboard();
             }
         }
 
         function logout() {
+            console.log("[Auth] Logging out...");
             sessionStorage.clear();
             location.reload();
         }
 
         // --- Dashboard Initialization ---
         async function initDashboard() {
-            document.getElementById('login-screen').classList.add('hidden');
-            document.getElementById('main-dashboard').classList.remove('hidden');
+            const loginScreen = document.getElementById('login-screen');
+            const mainDashboard = document.getElementById('main-dashboard');
             
+            if (loginScreen) loginScreen.classList.add('hidden');
+            if (mainDashboard) mainDashboard.classList.remove('hidden');
+            
+            // Initialize editor refs now that they are in DOM
+            initEditorVariables();
+
             Swal.fire({
                 title: 'جاري تحميل البيانات...',
                 allowOutsideClick: false,
                 didOpen: () => Swal.showLoading()
             });
 
-            await fetchArticles();
-            
-            populateCategoryDropdowns();
-            renderDashboard();
-            renderArticlesList();
-            
-            Swal.close();
-            showSection('overview');
+            try {
+                await fetchArticles();
+                populateCategoryDropdowns();
+                renderDashboard();
+                renderArticlesList();
+            } catch (err) {
+                console.error("[UI] Error loading dashboard:", err);
+            } finally {
+                Swal.close();
+                showSection('overview');
+            }
         }
+
+        // --- GitHub API Engine ---
+        async function githubAPI(path, method = 'GET', body = null) {
+            const token = sessionStorage.getItem('cms_token');
+            const separator = path.includes('?') ? '&' : '?';
+            const cacheBuster = `${separator}v=${Date.now()}`;
+            const url = `https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${path}${method === 'GET' ? cacheBuster : ''}`;
+            
+            const options = {
+                method,
+                headers: {
+                    'Authorization': `token ${token}`,
+                    'Accept': 'application/vnd.github.v3+json',
+                    'Content-Type': 'application/json'
+                }
+            };
+
+            if (body) options.body = JSON.stringify(body);
+
+            const response = await fetch(url, options);
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.message || 'GitHub API Error');
+            }
+            return await response.json();
+        }
+
+        async function fetchArticles() {
+            try {
+                const data = await githubAPI(CONFIG.articlesFile);
+                currentSha = data.sha;
+                const content = atob(data.content);
+                const decoded = decodeURIComponent(escape(content));
+                articlesData = JSON.parse(decoded);
+                console.log("Articles Data Loaded Successfully:", articlesData);
+                return articlesData;
+            } catch (err) {
+                console.error("Fetch Error:", err);
+                articlesData = [];
+                if (!err.message.includes('Not Found')) {
+                    Swal.fire('خطأ', 'تعذر جلب البيانات من GitHub: ' + err.message, 'error');
+                }
+                return [];
+            }
+        }
+
+        async function pushArticles(newArticles, message = 'Update articles via CMS') {
+            const jsonString = JSON.stringify(newArticles, null, 2);
+            const encoded = btoa(unescape(encodeURIComponent(jsonString)));
+            const freshData = await githubAPI(CONFIG.articlesFile);
+            
+            const body = {
+                message,
+                content: encoded,
+                sha: freshData.sha,
+                branch: CONFIG.branch
+            };
+
+            return await githubAPI(CONFIG.articlesFile, 'PUT', body);
+        }
+
+        async function uploadImage(file) {
+            const reader = new FileReader();
+            return new Promise((resolve, reject) => {
+                reader.onload = async () => {
+                    const base64 = reader.result.split(',')[1];
+                    const fileName = `${Date.now()}_${file.name.replace(/\s+/g, '_')}`;
+                    const path = `${CONFIG.uploadsFolder}/${fileName}`;
+                    
+                    try {
+                        const res = await githubAPI(path, 'PUT', {
+                            message: `Upload image: ${fileName}`,
+                            content: base64,
+                            branch: CONFIG.branch
+                        });
+                        const rawUrl = `https://raw.githubusercontent.com/${CONFIG.owner}/${CONFIG.repo}/${CONFIG.branch}/${path}`;
+                        resolve(rawUrl);
+                    } catch (err) {
+                        reject(err);
+                    }
+                };
+                reader.onerror = reject;
+                reader.readAsDataURL(file);
+            });
+        }
+
+        // --- UI Rendering ---
+        function showSection(id) {
+            const sections = ['overview', 'articles', 'categories', 'media'];
+            sections.forEach(s => {
+                const el = document.getElementById(`section-${s}`);
+                const link = document.getElementById(`link-${s}`);
+                if (el) el.classList.toggle('hidden', s !== id);
+                if (link) link.classList.toggle('active', s === id);
+            });
+
+            const meta = {
+                overview: { title: 'لوحة التحكم', desc: 'إحصائيات وأداء الموقع بشكل عام.' },
+                articles: { title: 'إدارة المقالات', desc: 'استعراض، تعديل، وحذف المقالات المنشورة.' },
+                categories: { title: 'التصنيفات', desc: 'إدارة وتخصيص أقسام المدونة.' },
+                media: { title: 'مكتبة الوسائط', desc: 'الصور والملفات المرفوعة.' }
+            };
+            
+            const titleEl = document.getElementById('section-title');
+            const descEl = document.getElementById('section-desc');
+            if (titleEl) titleEl.innerText = meta[id].title;
+            if (descEl) descEl.innerText = meta[id].desc;
+
+            if (id === 'articles') renderArticlesList();
+            if (id === 'overview') renderDashboard();
+        }
+
+        function renderDashboard() {
+            const statArticles = document.getElementById('stat-articles');
+            const statCategories = document.getElementById('stat-categories');
+            if (statArticles) statArticles.innerText = articlesData.length;
+            if (statCategories) {
+                const cats = [...new Set(articlesData.map(a => a.category))];
+                statCategories.innerText = cats.length;
+            }
+
+            const list = document.getElementById('recent-articles-list');
+            if (!list) return;
+
+            if (articlesData.length === 0) {
+                list.innerHTML = `<tr><td colspan="4" class="px-6 py-12 text-center text-slate-400 font-bold">لا توجد مقالات لعرضها حالياً.</td></tr>`;
+                return;
+            }
+
+            const recent = articlesData.slice(-5).reverse();
+            list.innerHTML = recent.map(art => `
+                <tr class="border-b border-slate-50 hover:bg-slate-50 transition">
+                    <td class="px-6 py-4 font-bold text-slate-700">${art.title.substring(0, 40)}...</td>
+                    <td class="px-6 py-4"><span class="px-3 py-1 bg-blue-50 text-blue-600 rounded-full text-xs font-bold">${art.category}</span></td>
+                    <td class="px-6 py-4 text-slate-500 text-sm">${new Date(art.date).toLocaleDateString('ar-EG')}</td>
+                    <td class="px-6 py-4"><span class="flex items-center gap-2 text-emerald-500 text-xs font-bold"><i class="fas fa-circle text-[8px]"></i> منشور</span></td>
+                </tr>
+            `).join('');
+        }
+
+        function renderArticlesList() {
+            const list = document.getElementById('full-articles-list');
+            if (!list) return;
+            
+            if (articlesData.length === 0) {
+                list.innerHTML = `<tr><td colspan="5" class="px-6 py-12 text-center text-slate-400 font-bold">لا توجد مقالات في قاعدة البيانات.</td></tr>`;
+                return;
+            }
+
+            const sorted = [...articlesData].reverse();
+            list.innerHTML = sorted.map(art => `
+                <tr class="border-b border-slate-50 hover:bg-slate-50 transition">
+                    <td class="px-6 py-4">
+                        <img src="${art.image}" class="w-16 h-10 object-cover rounded-lg shadow-sm" onerror="this.src='https://via.placeholder.com/80x50?text=No+Image'">
+                    </td>
+                    <td class="px-6 py-4">
+                        <div class="font-bold text-slate-800">${art.title}</div>
+                        <div class="text-[10px] text-slate-400 mt-1">ID: ${art.id}</div>
+                    </td>
+                    <td class="px-6 py-4"><span class="px-3 py-1 bg-slate-100 text-slate-600 rounded-full text-xs font-bold">${art.category}</span></td>
+                    <td class="px-6 py-4 text-slate-500 text-sm">${new Date(art.date).toLocaleDateString('ar-EG')}</td>
+                    <td class="px-6 py-4">
+                        <div class="flex gap-2">
+                            <button onclick="editArticle(${art.id})" class="w-8 h-8 bg-amber-50 text-amber-600 rounded-lg hover:bg-amber-100 transition"><i class="fas fa-edit"></i></button>
+                            <button onclick="deleteArticle(${art.id})" class="w-8 h-8 bg-rose-50 text-rose-600 rounded-lg hover:bg-rose-100 transition"><i class="fas fa-trash"></i></button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function populateCategoryDropdowns() {
+            const cats = ["أخبار", "وظائف", "الهجرة", "رياضة", "الطبخ", "تعليم السياقة", "أفلام", "ربح المال", "حرف ومشاريع", "وثائق إدارية", "إصلاح"];
+            const select = document.getElementById('art-category');
+            if (select) select.innerHTML = cats.map(c => `<option value="${c}">${c}</option>`).join('');
+            
+            const filter = document.getElementById('filter-category');
+            if (filter) filter.innerHTML = '<option value="">كل التصنيفات</option>' + cats.map(c => `<option value="${c}">${c}</option>`).join('');
+        }
+
+        function openArticleEditor() {
+            const editId = document.getElementById('edit-id');
+            const artTitle = document.getElementById('art-title');
+            const artImage = document.getElementById('art-image');
+            
+            if (editId) editId.value = '';
+            if (artTitle) artTitle.value = '';
+            if (artImage) artImage.value = '';
+            
+            if (editorRich) editorRich.innerHTML = '';
+            if (editorCode) editorCode.value = '';
+            if (artContentHidden) artContentHidden.value = '';
+            
+            if (editorModeToggle) {
+                editorModeToggle.checked = false;
+                editorRich.style.display = 'block';
+                editorCode.style.display = 'none';
+            }
+
+            const preview = document.getElementById('image-preview');
+            if (preview) preview.innerHTML = '<i class="fas fa-image text-4xl text-slate-300"></i>';
+            
+            const titleEl = document.getElementById('editor-title');
+            const btnText = document.getElementById('btn-text');
+            if (titleEl) titleEl.innerText = 'إضافة مقال جديد';
+            if (btnText) btnText.innerText = 'حفظ ونشر المقال';
+            
+            const overlay = document.getElementById('editor-overlay');
+            if (overlay) overlay.classList.remove('hidden');
+        }
+
+        function closeEditor() {
+            const overlay = document.getElementById('editor-overlay');
+            if (overlay) overlay.classList.add('hidden');
+        }
+
+        const imgUpload = document.getElementById('image-upload');
+        if (imgUpload) {
+            imgUpload.addEventListener('change', async (e) => {
+                if (e.target.files[0]) {
+                    try {
+                        Swal.fire({ title: 'جاري الرفع...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+                        const url = await uploadImage(e.target.files[0]);
+                        const artImage = document.getElementById('art-image');
+                        if (artImage) artImage.value = url;
+                        updateImagePreview(url);
+                        
+                        if (editorModeToggle.checked) {
+                            const start = editorCode.selectionStart;
+                            editorCode.value = editorCode.value.substring(0, start) + `<img src="${url}" alt="image">` + editorCode.value.substring(start);
+                        } else {
+                            document.execCommand('insertImage', false, url);
+                        }
+                        syncContent();
+
+                        Swal.fire('نجاح', 'تم رفع الصورة بنجاح!', 'success');
+                    } catch (err) {
+                        Swal.fire('خطأ', 'فشل رفع الصورة.', 'error');
+                    }
+                }
+            });
+        }
+
+        const artImageInput = document.getElementById('art-image');
+        if (artImageInput) {
+            artImageInput.addEventListener('input', (e) => updateImagePreview(e.target.value));
+        }
+
+        function updateImagePreview(url) {
+            const preview = document.getElementById('image-preview');
+            if (url && preview) {
+                preview.innerHTML = `<img src="${url}" class="w-full h-full object-cover">`;
+            }
+        }
+
+        const artForm = document.getElementById('article-form');
+        if (artForm) {
+            artForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const id = document.getElementById('edit-id').value;
+                
+                syncContent();
+                
+                const articleBody = artContentHidden.value;
+                const articleTitle = document.getElementById('art-title').value;
+                const articleCategory = document.getElementById('art-category').value;
+                const articleImage = document.getElementById('art-image').value;
+
+                Swal.fire({
+                    title: 'جاري الحفظ...',
+                    text: 'يتم الآن تحديث مستودع GitHub',
+                    allowOutsideClick: false,
+                    didOpen: () => Swal.showLoading()
+                });
+
+                try {
+                    let newArticles = [];
+                    if (id) {
+                        const existingIndex = articlesData.findIndex(a => a.id == id);
+                        const existingArticle = articlesData[existingIndex];
+                        
+                        const updatedArticle = {
+                            ...existingArticle,
+                            title: articleTitle,
+                            category: articleCategory,
+                            image: articleImage || 'https://via.placeholder.com/800x450',
+                            content: articleBody,
+                            date: new Date().toISOString()
+                        };
+                        newArticles = [...articlesData];
+                        newArticles[existingIndex] = updatedArticle;
+                    } else {
+                        const newArticle = {
+                            id: Date.now(),
+                            title: articleTitle,
+                            category: articleCategory,
+                            image: articleImage || 'https://via.placeholder.com/800x450',
+                            content: articleBody,
+                            date: new Date().toISOString(),
+                            views: 0
+                        };
+                        newArticles = [...articlesData, newArticle];
+                    }
+
+                    await pushArticles(newArticles, id ? `Update article: ${articleTitle}` : `Add new article: ${articleTitle}`);
+                    articlesData = newArticles;
+                    
+                    Swal.fire('تم بنجاح!', 'تم حفظ المقال ونشره على الموقع.', 'success');
+                    closeEditor();
+                    renderArticlesList();
+                    renderDashboard();
+                } catch (err) {
+                    console.error("Save Error:", err);
+                    Swal.fire('خطأ في الحفظ', err.message, 'error');
+                }
+            });
+        }
+
+        async function editArticle(id) {
+            const art = articlesData.find(a => a.id == id);
+            if (!art) return;
+
+            document.getElementById('edit-id').value = art.id;
+            document.getElementById('art-title').value = art.title;
+            document.getElementById('art-category').value = art.category;
+            const artImage = document.getElementById('art-image');
+            if (artImage) artImage.value = art.image;
+            updateImagePreview(art.image);
+            
+            editorRich.innerHTML = art.content;
+            editorCode.value = art.content;
+            artContentHidden.value = art.content;
+            
+            if (editorModeToggle) {
+                editorModeToggle.checked = false;
+                editorRich.style.display = 'block';
+                editorCode.style.display = 'none';
+            }
+
+            const titleEl = document.getElementById('editor-title');
+            const btnText = document.getElementById('btn-text');
+            if (titleEl) titleEl.innerText = 'تعديل مقال';
+            if (btnText) btnText.innerText = 'تحديث المقال';
+            
+            const overlay = document.getElementById('editor-overlay');
+            if (overlay) overlay.classList.remove('hidden');
+        }
+
+        async function deleteArticle(id) {
+            const res = await Swal.fire({
+                title: 'هل أنت متأكد؟',
+                text: "لن تتمكن من التراجع عن هذا!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#e11d48',
+                cancelButtonColor: '#64748b',
+                confirmButtonText: 'نعم، احذف!',
+                cancelButtonText: 'إلغاء'
+            });
+
+            if (res.isConfirmed) {
+                Swal.fire({ didOpen: () => Swal.showLoading() });
+                try {
+                    const newArticles = articlesData.filter(a => a.id != id);
+                    await pushArticles(newArticles, `Delete article with ID: ${id}`);
+                    articlesData = newArticles;
+                    renderArticlesList();
+                    renderDashboard();
+                    Swal.fire('تم الحذف!', 'تمت إزالة المقال من الموقع.', 'success');
+                } catch (err) {
+                    Swal.fire('خطأ', err.message, 'error');
+                }
+            }
+        }
+    </script>
 
         // --- GitHub API Engine ---
         async function githubAPI(path, method = 'GET', body = null) {
