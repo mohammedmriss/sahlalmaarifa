@@ -40,7 +40,9 @@
     <main class="container main-content">
         <div id="article-view" class="detail-view" style="display: none;">
             <header class="detail-header">
-                <div id="ad-top" class="ad-banner-container"></div>
+                <!-- Top Banner -->
+                <div id="ad-top" class="ad-container"></div>
+                
                 <div id="article-category" class="card-badge"></div>
                 <h1 id="article-title"></h1>
                 <div class="card-date" id="article-date">
@@ -52,12 +54,16 @@
                 <img id="article-image" src="" alt="" class="detail-img">
             </div>
 
+            <!-- Native Banner (Middle) -->
+            <div id="ad-native" class="ad-container"></div>
+
             <div class="detail-content">
                 <div id="article-content" class="article-body">
                     <!-- Content will be injected here -->
                 </div>
 
-                <div id="ad-bottom" class="ad-banner-container"></div>
+                <!-- Bottom Banner -->
+                <div id="ad-bottom" class="ad-container"></div>
                 
                 <div class="share-box">
                     <h4>شارك المقال:</h4>
@@ -122,36 +128,85 @@
     
     <script src="script.js"></script>
 
-    <!-- Ad Injection & Admin Bypass -->
+    <!-- Ad System: Multi-Unit Responsive Injection -->
     <script>
         (function() {
             const isAdmin = sessionStorage.getItem('cms_auth') === 'true';
-            if (!isAdmin) {
-                const containers = document.querySelectorAll('.ad-banner-container');
-                containers.forEach(container => {
-                    container.style.display = 'flex';
-                    container.innerHTML = `
-                        <div class="ad-label">إعلان</div>
-                        <div class="ad-wrapper">
-                            <iframe src="about:blank" style="border:none; overflow:hidden; width:728px; height:90px;" id="ad-frame-${Math.random().toString(36).substr(2, 9)}"></iframe>
-                        </div>
-                    `;
-                    
-                    const iframe = container.querySelector('iframe');
-                    const adContent = `
-                        <body style="margin:0; padding:0; display:flex; justify-content:center;">
-                            <script type="text/javascript">
-                                atOptions = { 'key' : '2eec278120f5f7a89f32f85d1fe4d7d0', 'format' : 'iframe', 'height' : 90, 'width' : 728, 'params' : {} };
-                            <\\/script>
-                            <script type="text/javascript" src="https://www.highperformanceformat.com/2eec278120f5f7a89f32f85d1fe4d7d0/invoke.js"><\\/script>
-                        </body>
-                    `;
-                    
-                    iframe.contentWindow.document.open();
-                    iframe.contentWindow.document.write(adContent.replace(/\\\\/g, ''));
-                    iframe.contentWindow.document.close();
-                });
+            if (isAdmin) {
+                console.log("[Ads] Admin detected. All ad units blocked.");
+                document.querySelectorAll('.ad-container').forEach(el => el.remove());
+                return;
             }
+
+            console.log("[Ads] Visitor detected. Initializing ad system...");
+
+            const isMobile = window.innerWidth < 768;
+            const bannerConfig = isMobile 
+                ? { key: 'c304a0f2ad6aa7c638825c36ef06ecfc', format: 'iframe', height: 50, width: 320 }
+                : { key: '2eec278120f5f7a89f32f85d1fe4d7d0', format: 'iframe', height: 90, width: 728 };
+
+            /**
+             * Injects a Banner Ad into a container
+             */
+            function injectBanner(containerId) {
+                const container = document.getElementById(containerId);
+                if (!container) return;
+
+                container.innerHTML = `
+                    <div class="ad-label">إعلان</div>
+                    <div class="ad-wrapper">
+                        <iframe src="about:blank" style="border:none; overflow:hidden; width:${bannerConfig.width}px; height:${bannerConfig.height}px;" id="ad-frame-${containerId}"></iframe>
+                    </div>
+                `;
+
+                const iframe = container.querySelector('iframe');
+                const adContent = `
+                    <body style="margin:0; padding:0; display:flex; justify-content:center; align-items:center;">
+                        <script type="text/javascript">
+                            atOptions = { 'key' : '${bannerConfig.key}', 'format' : '${bannerConfig.format}', 'height' : ${bannerConfig.height}, 'width' : ${bannerConfig.width}, 'params' : {} };
+                        <\/script>
+                        <script type="text/javascript" src="https://www.highperformanceformat.com/${bannerConfig.key}/invoke.js"><\/script>
+                    </body>
+                `;
+                iframe.contentWindow.document.open();
+                iframe.contentWindow.document.write(adContent);
+                iframe.contentWindow.document.close();
+            }
+
+            /**
+             * Injects the Native Ad unit
+             */
+            function injectNative() {
+                const container = document.getElementById('ad-native');
+                if (!container) return;
+
+                container.innerHTML = `
+                    <div class="ad-label">إعلان مُوصى به</div>
+                    <div id="container-221684e058b14ed5f003089e20d53d20"></div>
+                `;
+
+                const script = document.createElement('script');
+                script.async = true;
+                script.dataset.cfasync = "false";
+                script.src = "https://pl29393334.profitablecpmratenetwork.com/221684e058b14ed5f003089e20d53d20/invoke.js";
+                document.head.appendChild(script);
+            }
+
+            /**
+             * Injects the Social Bar (Floating)
+             */
+            function injectSocialBar() {
+                const script = document.createElement('script');
+                script.type = 'text/javascript';
+                script.src = 'https://pl29383016.profitablecpmratenetwork.com/d9/f5/61/d9f561c67aa146f49ee840e3db6a4e60.js';
+                document.head.appendChild(script);
+            }
+
+            // Run Injections
+            injectBanner('ad-top');
+            injectNative();
+            injectBanner('ad-bottom');
+            injectSocialBar();
         })();
     </script>
 </body>
