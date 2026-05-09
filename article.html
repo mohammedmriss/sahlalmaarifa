@@ -1,6 +1,31 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
+    <!-- Google Analytics (GA4) with Admin Bypass -->
+    <script>
+        (function() {
+            const GA_ID = 'G-P03QVMY7X4';
+            const isAdmin = sessionStorage.getItem('cms_auth') === 'true';
+
+            if (isAdmin) {
+                console.log("[Analytics] Tracking disabled for Admin.");
+            } else {
+                console.log("[Analytics] Tracking active for visitor.");
+                
+                // Inject gtag.js
+                const script = document.createElement('script');
+                script.async = true;
+                script.src = `https://www.googletagmanager.com/gtag/js?id=${GA_ID}`;
+                document.head.appendChild(script);
+
+                // Initialize dataLayer and gtag
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){dataLayer.push(arguments);}
+                gtag('js', new Date());
+                gtag('config', GA_ID);
+            }
+        })();
+    </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title id="page-title">مقال | مدونة سهل المعرفة الشاملة</title>
