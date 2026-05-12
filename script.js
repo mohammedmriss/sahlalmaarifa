@@ -293,3 +293,21 @@ if (document.readyState === 'loading') {
 } else {
     init();
 }
+
+
+
+// كود باش تجيب الرابط ديال الصفحة الحالية
+const currentUrl = encodeURIComponent(window.location.href);
+const currentTitle = encodeURIComponent(document.title);
+
+// فيسبوك
+document.getElementById('share-facebook').href = `https://www.facebook.com/sharer/sharer.php?u=${currentUrl}`;
+
+// تويتر (X)
+document.getElementById('share-twitter').href = `https://twitter.com/intent/tweet?url=${currentUrl}&text=${currentTitle}`;
+
+// واتساب (مهم بزاف للمقالات)
+const whatsappBtn = document.getElementById('share-whatsapp');
+if(whatsappBtn) {
+    whatsappBtn.href = `https://api.whatsapp.com/send?text=${currentTitle}%20${currentUrl}`;
+}
