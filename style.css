@@ -707,56 +707,8 @@ img {
     transition: width 0.2s ease;
 }
 
-/* Ad Banners & Units */
-.ad-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    margin: 35px auto;
-    width: 100%;
-    text-align: center;
-    overflow: hidden;
-}
-
-.ad-label {
-    font-size: 10px;
-    color: #a1a1aa;
-    text-transform: uppercase;
-    margin-bottom: 10px;
-    letter-spacing: 1.5px;
-    font-weight: 600;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.ad-label::before, .ad-label::after {
-    content: "";
-    height: 1px;
-    width: 30px;
-    background: #e2e8f0;
-}
-
-.ad-wrapper {
-    display: flex;
-    justify-content: center;
-    background: #fafafa;
-    border-radius: 8px;
-    padding: 5px;
-    transition: var(--transition);
-}
-
-.native-ad-wrapper {
-    margin: 30px auto;
-    max-width: 100%;
-    display: flex;
-    justify-content: center;
-}
-
 @media (max-width: 768px) {
-    .ad-container { margin: 25px auto; }
-    .ad-wrapper { padding: 2px; }
+    .container { padding: 0 15px; }
 }
 
 .back-to-top {
